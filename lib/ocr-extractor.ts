@@ -38,13 +38,13 @@ export async function extractTextFromPDF(
 ): Promise<ExtractedInvoiceData> {
   try {
     const pdfModule = await import("pdfjs-dist");
-    const pdfjs = pdfModule as unknown as typeof import("pdfjs-dist");
+    const pdfjsLib = pdfModule as any;
     
-    // Set worker path for pdfjs
-    pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+    // Set worker path for pdfjs - use CDN version
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.269/pdf.worker.min.js`;
 
     const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
 
     let fullText = "";
     const pageCount = Math.min(pdf.numPages, 3); // Limit to first 3 pages
@@ -53,9 +53,14 @@ export async function extractTextFromPDF(
       const page = await pdf.getPage(i);
       const textContent = await page.getTextContent();
       const pageText = textContent.items
-        .map((item: any) => item.str)
+        .map((item: any) => (item.str ? item.str : ""))
         .join(" ");
       fullText += pageText + "\n";
+    }
+
+    // If no text was extracted, return a generic message
+    if (!fullText.trim()) {
+      fullText = "PDF processed but contains scanned images or no extractable text. Please try with a text-based PDF or image file.";
     }
 
     return {
@@ -64,7 +69,7 @@ export async function extractTextFromPDF(
     };
   } catch (error) {
     console.error("[v0] PDF extraction failed:", error);
-    throw new Error("Failed to extract text from PDF. Please try again.");
+    throw new Error("Failed to extract text from PDF. The file may be corrupted, scanned, or use unsupported encoding. Please try with a different file or use an image format.");
   }
 }
 

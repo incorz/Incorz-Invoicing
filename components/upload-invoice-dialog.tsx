@@ -85,6 +85,13 @@ export function UploadInvoiceDialog({
         extractedData = await extractTextFromImage(selectedFile);
       }
 
+      // Check if extraction returned meaningful data
+      if (!extractedData.text || extractedData.text.trim().length < 10) {
+        setError("No readable text found in the file. Please try with a different file that contains clear text.");
+        setLoading(false);
+        return;
+      }
+
       const parsedData = parseInvoiceFromText(extractedData.text);
 
       onInvoiceExtracted({
@@ -104,7 +111,7 @@ export function UploadInvoiceDialog({
       setError(
         err instanceof Error
           ? err.message
-          : "Failed to process file. Please try again."
+          : "Failed to process file. Please try again with a different file."
       );
     } finally {
       setLoading(false);
