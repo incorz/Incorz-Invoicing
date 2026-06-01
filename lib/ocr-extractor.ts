@@ -1,8 +1,7 @@
-import * as pdfjs from "pdfjs-dist";
-import Tesseract from "tesseract.js";
+"use client";
 
-// Set worker path for pdfjs
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+import type * as pdfjs from "pdfjs-dist";
+import type Tesseract from "tesseract.js";
 
 export interface ExtractedInvoiceData {
   text: string;
@@ -16,6 +15,7 @@ export async function extractTextFromImage(
   file: File
 ): Promise<ExtractedInvoiceData> {
   try {
+    const Tesseract = (await import("tesseract.js")).default;
     const result = await Tesseract.recognize(file, "eng");
     const text = result.data.text;
     const confidence = result.data.confidence;
@@ -37,6 +37,12 @@ export async function extractTextFromPDF(
   file: File
 ): Promise<ExtractedInvoiceData> {
   try {
+    const pdfModule = await import("pdfjs-dist");
+    const pdfjs = pdfModule as unknown as typeof import("pdfjs-dist");
+    
+    // Set worker path for pdfjs
+    pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+
     const arrayBuffer = await file.arrayBuffer();
     const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
 
