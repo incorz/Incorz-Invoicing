@@ -1,7 +1,7 @@
 "use client";
 
 import { Dispatch, SetStateAction } from "react";
-import { PlusCircle, Trash2 } from "lucide-react";
+import { PlusCircle, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,6 +20,7 @@ interface InvoiceFormProps {
   setData: Dispatch<SetStateAction<InvoiceData>>;
   onDownload: () => void;
   onReset: () => void;
+  onUpload: () => void;
   invoiceNumLoading?: boolean;
 }
 
@@ -28,6 +29,7 @@ export default function InvoiceForm({
   setData,
   onDownload,
   onReset,
+  onUpload,
   invoiceNumLoading = false,
 }: InvoiceFormProps) {
   const updateField = <K extends keyof InvoiceData>(key: K, value: InvoiceData[K]) => {
@@ -309,6 +311,14 @@ export default function InvoiceForm({
       <div className="px-5 py-5 flex flex-col gap-3">
         <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/60">Export</p>
 
+        <Button
+          variant="outline"
+          className="w-full h-9 rounded-full cursor-pointer text-xs text-muted-foreground border-border hover:bg-secondary"
+          onClick={onUpload}
+        >
+          <Upload className="w-3.5 h-3.5 mr-2" />
+          Upload Invoice
+        </Button>
         <Button
           className="w-full h-10 text-white font-semibold rounded-full cursor-pointer text-xs tracking-wider border-0 transition-opacity hover:opacity-90"
           style={{ background: "linear-gradient(135deg, #ff0d13 0%, #ff6b00 100%)" }}
