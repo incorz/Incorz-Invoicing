@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import InvoiceForm from "@/components/invoice-form";
 import InvoicePreview from "@/components/invoice-preview";
 import PasscodeGate from "@/components/passcode-gate";
+import { UploadInvoiceDialog } from "@/components/upload-invoice-dialog";
 import { InvoiceData, DEFAULT_INVOICE } from "@/lib/invoice-types";
 
 const FORM_DATA_KEY = "buzz_filing_form_data";
@@ -34,6 +35,7 @@ export default function Home() {
 
   const [mounted, setMounted] = useState(false);
   const [invoiceNumLoading, setInvoiceNumLoading] = useState(true);
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const downloadingRef = useRef(false);
 
   const previewRef = useRef<HTMLDivElement>(null);
@@ -146,9 +148,41 @@ export default function Home() {
     }
   }, []);
 
+  const handleInvoiceExtracted = useCallback(
+    (extractedData: {
+      billTo: string;
+      invoiceDate: string;
+      invoiceNumber: number;
+      description: string;
+      amount: number;
+    }) => {
+      setInvoiceData((prev) => ({
+        ...prev,
+        billTo: extractedData.billTo || prev.billTo,
+        invoiceDate: extractedData.invoiceDate || prev.invoiceDate,
+        lineItems: extractedData.description
+          ? [
+              {
+                id: crypto.randomUUID(),
+                description: extractedData.description,
+                qty: 1,
+                rate: extractedData.amount,
+              },
+            ]
+          : prev.lineItems,
+      }));
+    },
+    []
+  );
+
   return (
     <PasscodeGate>
     <div className="min-h-screen bg-background flex flex-col">
+      <UploadInvoiceDialog
+        open={uploadDialogOpen}
+        onOpenChange={setUploadDialogOpen}
+        onInvoiceExtracted={handleInvoiceExtracted}
+      />
 
       {/* ── Header ── */}
       <header className="sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-border shadow-sm">
@@ -180,6 +214,7 @@ export default function Home() {
             setData={setInvoiceData}
             onDownload={handleDownload}
             onReset={handleReset}
+            onUpload={() => setUploadDialogOpen(true)}
             invoiceNumLoading={invoiceNumLoading}
           />
         </aside>

@@ -1,5 +1,5 @@
 export type PaymentStatus = "Paid" | "Partial Paid" | "Unpaid";
-
+export type Currency = "USD" | "GBP";
 export type ServiceType = string;
 
 export interface LineItem {
@@ -16,6 +16,7 @@ export interface InvoiceData {
   serviceType: ServiceType;
   invoiceBy: string;
   paymentStatus: PaymentStatus;
+  currency: Currency;
   lineItems: LineItem[];
   discount: number;
   paymentReceived: number;
@@ -42,6 +43,7 @@ export const DEFAULT_INVOICE: Omit<InvoiceData, "invoiceNumber"> = {
   serviceType: "LLC Formation",
   invoiceBy: "",
   paymentStatus: "Unpaid",
+  currency: "USD",
   lineItems: [
     {
       id: crypto.randomUUID(),
@@ -53,4 +55,14 @@ export const DEFAULT_INVOICE: Omit<InvoiceData, "invoiceNumber"> = {
   discount: 0,
   paymentReceived: 0,
   paymentTerms: "",
+};
+
+export const CURRENCY_SYMBOLS: Record<Currency, string> = {
+  USD: "$",
+  GBP: "£",
+};
+
+export const CURRENCY_NAMES: Record<Currency, string> = {
+  USD: "US Dollar",
+  GBP: "British Pound",
 };

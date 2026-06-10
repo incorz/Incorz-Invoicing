@@ -1,7 +1,7 @@
 "use client";
 
 import { Dispatch, SetStateAction } from "react";
-import { PlusCircle, Trash2 } from "lucide-react";
+import { PlusCircle, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,13 +13,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { InvoiceData, LineItem, PaymentStatus } from "@/lib/invoice-types";
+import { InvoiceData, LineItem, PaymentStatus, Currency, CURRENCY_NAMES, CURRENCY_SYMBOLS } from "@/lib/invoice-types";
 
 interface InvoiceFormProps {
   data: InvoiceData;
   setData: Dispatch<SetStateAction<InvoiceData>>;
   onDownload: () => void;
   onReset: () => void;
+  onUpload: () => void;
   invoiceNumLoading?: boolean;
 }
 
@@ -28,6 +29,7 @@ export default function InvoiceForm({
   setData,
   onDownload,
   onReset,
+  onUpload,
   invoiceNumLoading = false,
 }: InvoiceFormProps) {
   const updateField = <K extends keyof InvoiceData>(key: K, value: InvoiceData[K]) => {
@@ -155,6 +157,22 @@ export default function InvoiceForm({
             </SelectContent>
           </Select>
         </div>
+
+        <div className="flex flex-col gap-1.5">
+          <Label className="text-xs">Currency</Label>
+          <Select
+            value={data.currency}
+            onValueChange={(v) => updateField("currency", v as Currency)}
+          >
+            <SelectTrigger className="field-input h-9 px-4">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="USD">USD - US Dollar</SelectItem>
+              <SelectItem value="GBP">GBP - British Pound</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* ── Line Items ── */}
@@ -166,7 +184,7 @@ export default function InvoiceForm({
           <div className="grid grid-cols-[1fr_48px_72px_32px] gap-1.5 text-[10px] font-medium text-muted-foreground px-1">
             <span>Description</span>
             <span className="text-center">QTY</span>
-            <span className="text-center">Rate $</span>
+            <span className="text-center">Rate {CURRENCY_SYMBOLS[data.currency]}</span>
             <span />
           </div>
 
@@ -208,7 +226,7 @@ export default function InvoiceForm({
               </div>
               {/* Amount display */}
               <div className="text-right pr-9 text-[10px] font-semibold text-muted-foreground">
-                = ${(item.qty * item.rate).toFixed(2)}
+                = {CURRENCY_SYMBOLS[data.currency]}{(item.qty * item.rate).toFixed(2)}
               </div>
             </div>
           ))}
@@ -234,12 +252,12 @@ export default function InvoiceForm({
           <div className="flex flex-col gap-1.5">
             <Label className="text-xs text-muted-foreground">Sub Total</Label>
             <div className="h-9 flex items-center px-4 rounded-full border border-border bg-muted/60 text-xs font-semibold text-foreground tabular-nums">
-              ${subTotal.toFixed(2)}
+              {CURRENCY_SYMBOLS[data.currency]}{subTotal.toFixed(2)}
             </div>
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="discount" className="text-xs">Discount ($)</Label>
+            <Label htmlFor="discount" className="text-xs">Discount ({CURRENCY_SYMBOLS[data.currency]})</Label>
             <Input
               id="discount"
               type="text"
@@ -252,7 +270,7 @@ export default function InvoiceForm({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="paymentReceived" className="text-xs">Payment Received ($)</Label>
+            <Label htmlFor="paymentReceived" className="text-xs">Payment Received ({CURRENCY_SYMBOLS[data.currency]})</Label>
             <Input
               id="paymentReceived"
               type="text"
@@ -271,7 +289,7 @@ export default function InvoiceForm({
               className="h-9 flex items-center px-4 rounded-full text-xs font-bold text-white tabular-nums"
               style={{ background: "linear-gradient(135deg, #ff0d13 0%, #ff6b00 100%)" }}
             >
-              ${balance.toFixed(2)}
+              {CURRENCY_SYMBOLS[data.currency]}{balance.toFixed(2)}
             </div>
           </div>
         </div>
@@ -293,6 +311,14 @@ export default function InvoiceForm({
       <div className="px-5 py-5 flex flex-col gap-3">
         <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/60">Export</p>
 
+        <Button
+          variant="outline"
+          className="w-full h-9 rounded-full cursor-pointer text-xs text-muted-foreground border-border hover:bg-secondary"
+          onClick={onUpload}
+        >
+          <Upload className="w-3.5 h-3.5 mr-2" />
+          Upload Invoice
+        </Button>
         <Button
           className="w-full h-10 text-white font-semibold rounded-full cursor-pointer text-xs tracking-wider border-0 transition-opacity hover:opacity-90"
           style={{ background: "linear-gradient(135deg, #ff0d13 0%, #ff6b00 100%)" }}

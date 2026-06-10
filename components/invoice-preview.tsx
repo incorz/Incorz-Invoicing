@@ -1,7 +1,7 @@
 "use client";
 
 import { forwardRef, CSSProperties } from "react";
-import { InvoiceData, COMPANY_INFO } from "@/lib/invoice-types";
+import { InvoiceData, COMPANY_INFO, CURRENCY_SYMBOLS } from "@/lib/invoice-types";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
@@ -83,9 +83,9 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
   ];
 
   const totalsRows: [string, string][] = [
-    ["Sub Total", `$${subTotal.toFixed(2)}`],
-    ["Discount",  `$${data.discount.toFixed(2)}`],
-    ["Payment",   `$${data.paymentReceived.toFixed(2)}`],
+    ["Sub Total", `${CURRENCY_SYMBOLS[data.currency]}${subTotal.toFixed(2)}`],
+    ["Discount",  `${CURRENCY_SYMBOLS[data.currency]}${data.discount.toFixed(2)}`],
+    ["Payment",   `${CURRENCY_SYMBOLS[data.currency]}${data.paymentReceived.toFixed(2)}`],
   ];
 
   const bankRows: [string, string][] = [
@@ -311,10 +311,10 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                   </td>
                   <td style={cell({ textAlign: "center", padding: "9px 12px" })}>{item.qty}</td>
                   <td style={cell({ textAlign: "right",  padding: "9px 12px" })}>
-                    {item.rate === 0 ? "—" : `$${item.rate.toFixed(0)}`}
+                    {item.rate === 0 ? "—" : `${CURRENCY_SYMBOLS[data.currency]}${item.rate.toFixed(0)}`}
                   </td>
                   <td style={cell({ textAlign: "right", fontWeight: "700", padding: "9px 12px" })}>
-                    {item.rate === 0 ? "—" : `$${amount.toFixed(0)}`}
+                    {item.rate === 0 ? "—" : `${CURRENCY_SYMBOLS[data.currency]}${amount.toFixed(0)}`}
                   </td>
                 </tr>
               );
@@ -374,7 +374,7 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                 color: C.white,
                 textAlign: "right",
                 verticalAlign: "middle",
-              }}>${balance.toFixed(2)}</td>
+              }}>{CURRENCY_SYMBOLS[data.currency]}{balance.toFixed(2)}</td>
             </tr>
           </tbody>
         </table>
