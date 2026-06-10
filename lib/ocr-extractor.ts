@@ -37,39 +37,71 @@ export async function extractTextFromPDF(
   file: File
 ): Promise<ExtractedInvoiceData> {
   try {
-    const pdfModule = await import("pdfjs-dist");
-    const pdfjsLib = pdfModule as any;
+    // Dynamically import pdfjs
+    const pdfjsModule = await import("pdfjs-dist");
+    const pdfjs = pdfjsModule as any;
     
-    // Set worker path for pdfjs - use CDN version
-    pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.269/pdf.worker.min.js`;
+    // Set worker from node_modules
+    pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
 
     const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    
+    // Load the PDF document
+    const loadingTask = pdfjs.getDocument({ data: arrayBuffer });
+    const pdf = await loadingTask.promise;
 
     let fullText = "";
-    const pageCount = Math.min(pdf.numPages, 3); // Limit to first 3 pages
+    const pageCount = Math.min(pdf.numPages, 5); // Limit to first 5 pages
 
-    for (let i = 1; i <= pageCount; i++) {
-      const page = await pdf.getPage(i);
-      const textContent = await page.getTextContent();
-      const pageText = textContent.items
-        .map((item: any) => (item.str ? item.str : ""))
-        .join(" ");
-      fullText += pageText + "\n";
+    // Extract text from each page
+    for (let pageNum = 1; pageNum <= pageCount; pageNum++) {
+      try {
+        const page = await pdf.getPage(pageNum);
+        const textContent = await page.getTextContent();
+        
+        const pageText = textContent.items
+          .map((item: any) => {
+            if (typeof item.str === "string") {
+              return item.str;
+            }
+            return "";
+          })
+          .join(" ")
+          .trim();
+        
+        if (pageText) {
+          fullText += pageText + "\n";
+        }
+      } catch (pageError) {
+        console.warn(`[v0] Failed to extract text from page ${pageNum}:`, pageError);
+        // Continue with next page
+        continue;
+      }
     }
 
-    // If no text was extracted, return a generic message
+    // If no text was extracted, provide helpful feedback
     if (!fullText.trim()) {
-      fullText = "PDF processed but contains scanned images or no extractable text. Please try with a text-based PDF or image file.";
+      fullText = "[Scanned PDF or no extractable text detected]";
     }
 
     return {
       text: fullText,
-      confidence: 100,
+      confidence: fullText.includes("[Scanned") ? 50 : 100,
     };
   } catch (error) {
-    console.error("[v0] PDF extraction failed:", error);
-    throw new Error("Failed to extract text from PDF. The file may be corrupted, scanned, or use unsupported encoding. Please try with a different file or use an image format.");
+    console.error("[v0] PDF extraction error:", error);
+    // Provide a more specific error message
+    let errorMessage = "Failed to extract text from PDF.";
+    if (error instanceof Error) {
+      if (error.message.includes("worker")) {
+        errorMessage += " The PDF worker failed to load. Please try again.";
+      } else if (error.message.includes("corrupt") || error.message.includes("damaged")) {
+        errorMessage += " The file appears to be corrupted.";
+      } else {
+        errorMessage += " The file may be in an unsupported format.";
+      }
+    }
+    throw new Error(errorMessage);
   }
 }
 

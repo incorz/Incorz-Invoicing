@@ -79,15 +79,27 @@ export function UploadInvoiceDialog({
 
     try {
       let extractedData;
-      if (selectedFile.type === "application/pdf") {
-        extractedData = await extractTextFromPDF(selectedFile);
-      } else {
-        extractedData = await extractTextFromImage(selectedFile);
+      try {
+        if (selectedFile.type === "application/pdf") {
+          extractedData = await extractTextFromPDF(selectedFile);
+        } else {
+          extractedData = await extractTextFromImage(selectedFile);
+        }
+      } catch (extractError) {
+        // If PDF extraction fails, provide helpful error
+        console.error("[v0] Extraction error:", extractError);
+        if (selectedFile.type === "application/pdf") {
+          setError("Unable to extract text from this PDF. The file may be: scanned/image-based, corrupted, or in an unsupported format. Try uploading the document as an image (JPEG, PNG) instead, or manually enter the invoice details.");
+        } else {
+          setError("Unable to extract text from this image. Please ensure the image is clear and contains readable text. You can manually enter the invoice details instead.");
+        }
+        setLoading(false);
+        return;
       }
 
       // Check if extraction returned meaningful data
-      if (!extractedData.text || extractedData.text.trim().length < 10) {
-        setError("No readable text found in the file. Please try with a different file that contains clear text.");
+      if (!extractedData.text || extractedData.text.trim().length < 5) {
+        setError("No readable text found in the file. Please try a different file with clearer, readable text.");
         setLoading(false);
         return;
       }
@@ -111,7 +123,7 @@ export function UploadInvoiceDialog({
       setError(
         err instanceof Error
           ? err.message
-          : "Failed to process file. Please try again with a different file."
+          : "Failed to process file. Please try again or enter the invoice details manually."
       );
     } finally {
       setLoading(false);
