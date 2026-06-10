@@ -34,6 +34,7 @@ export function UploadInvoiceDialog({
   const [preview, setPreview] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
+  const [extractionFailed, setExtractionFailed] = useState(false);
 
   const handleFileSelect = (file: File) => {
     const validTypes = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
@@ -76,34 +77,42 @@ export function UploadInvoiceDialog({
 
     setLoading(true);
     setError("");
+    setExtractionFailed(false);
 
     try {
       let extractedData;
+      let extractionSucceeded = true;
+
       try {
         if (selectedFile.type === "application/pdf") {
           extractedData = await extractTextFromPDF(selectedFile);
         } else {
           extractedData = await extractTextFromImage(selectedFile);
         }
-      } catch (extractError) {
-        // If PDF extraction fails, provide helpful error
-        console.error("[v0] Extraction error:", extractError);
-        if (selectedFile.type === "application/pdf") {
-          setError("Unable to extract text from this PDF. The file may be: scanned/image-based, corrupted, or in an unsupported format. Try uploading the document as an image (JPEG, PNG) instead, or manually enter the invoice details.");
-        } else {
-          setError("Unable to extract text from this image. Please ensure the image is clear and contains readable text. You can manually enter the invoice details instead.");
+
+        // Check if extraction returned meaningful data
+        if (!extractedData.text || extractedData.text.trim().length < 5) {
+          extractionSucceeded = false;
         }
+      } catch (extractError) {
+        // Mark extraction as failed but allow user to proceed manually
+        console.error("[v0] Extraction error:", extractError);
+        extractionSucceeded = false;
+      }
+
+      // If extraction failed, show error and allow manual entry
+      if (!extractionSucceeded) {
+        setError(
+          selectedFile.type === "application/pdf"
+            ? "Could not automatically extract text from this PDF. You can still proceed and manually enter the invoice details by referencing the PDF preview above."
+            : "Could not automatically extract text from this image. You can still proceed and manually enter the invoice details by referencing the image preview above."
+        );
+        setExtractionFailed(true);
         setLoading(false);
         return;
       }
 
-      // Check if extraction returned meaningful data
-      if (!extractedData.text || extractedData.text.trim().length < 5) {
-        setError("No readable text found in the file. Please try a different file with clearer, readable text.");
-        setLoading(false);
-        return;
-      }
-
+      // Auto-fill successful - populate the form
       const parsedData = parseInvoiceFromText(extractedData.text);
 
       onInvoiceExtracted({
@@ -130,10 +139,21 @@ export function UploadInvoiceDialog({
     }
   };
 
+  const handleProceedManually = () => {
+    // Close the dialog and allow user to manually enter data while viewing the preview
+    // If needed, we could store the preview for reference
+    setSelectedFile(null);
+    setPreview("");
+    setError("");
+    setExtractionFailed(false);
+    onOpenChange(false);
+  };
+
   const handleClose = () => {
     setSelectedFile(null);
     setPreview("");
     setError("");
+    setExtractionFailed(false);
     onOpenChange(false);
   };
 
@@ -209,13 +229,23 @@ export function UploadInvoiceDialog({
             >
               Cancel
             </Button>
-            <Button
-              onClick={handleProcessFile}
-              disabled={!selectedFile || loading}
-            >
-              {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              {loading ? "Processing..." : "Extract & Import"}
-            </Button>
+            {extractionFailed ? (
+              <Button
+                onClick={handleProceedManually}
+                disabled={loading}
+                className="bg-amber-600 hover:bg-amber-700"
+              >
+                Proceed & Manually Enter
+              </Button>
+            ) : (
+              <Button
+                onClick={handleProcessFile}
+                disabled={!selectedFile || loading}
+              >
+                {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                {loading ? "Processing..." : "Extract & Import"}
+              </Button>
+            )}
           </div>
 
           {/* Clear Button */}
