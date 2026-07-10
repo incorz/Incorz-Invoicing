@@ -1,5 +1,6 @@
 import { getDb } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
+import { revalidatePath } from "next/cache";
 
 export const runtime = "nodejs";
 
@@ -36,6 +37,10 @@ export async function POST(req: Request) {
         { status: 404 }
       );
     }
+
+    // Revalidate cache to ensure deleted invoice is removed from list
+    revalidatePath("/api/invoices/list");
+    revalidatePath("/history");
 
     return Response.json({ success: true });
   } catch (error) {

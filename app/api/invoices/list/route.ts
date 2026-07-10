@@ -1,7 +1,8 @@
 import { getDb } from "@/lib/mongodb";
 
 export const runtime = "nodejs";
-export const revalidate = 60; // Cache for 60 seconds
+// Don't cache list to ensure deleted invoices are immediately removed
+export const revalidate = 0;
 
 export async function GET(req: Request) {
   try {
@@ -24,7 +25,7 @@ export async function GET(req: Request) {
       { invoices: invoiceList },
       {
         headers: {
-          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+          "Cache-Control": "no-store, must-revalidate",
         },
       }
     );
