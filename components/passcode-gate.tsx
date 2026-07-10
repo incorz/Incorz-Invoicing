@@ -1,15 +1,19 @@
 "use client";
 
 import { useState, useRef, useEffect, KeyboardEvent } from "react";
+import { Button } from "@/components/ui/button";
 
 const CORRECT = "2668";
 const DIGITS = 4;
+const PIN_STORAGE_KEY = "buzz_filing_pin_saved";
 
 export default function PasscodeGate({ children }: { children: React.ReactNode }) {
   const [unlocked, setUnlocked] = useState(false);
   const [code, setCode] = useState<string[]>(Array(DIGITS).fill(""));
   const [error, setError] = useState(false);
   const [shake, setShake] = useState(false);
+  const [showPinSetup, setShowPinSetup] = useState(false);
+  const [pinSavedThisSession, setPinSavedThisSession] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
@@ -20,6 +24,16 @@ export default function PasscodeGate({ children }: { children: React.ReactNode }
         setUnlocked(true);
         return;
       }
+
+      // Check if PIN was already saved in this session
+      const pinSaved = sessionStorage.getItem(PIN_STORAGE_KEY);
+      if (pinSaved === "true") {
+        setUnlocked(true);
+        return;
+      }
+
+      // First time - show PIN setup option
+      setShowPinSetup(true);
     }
     inputRefs.current[0]?.focus();
   }, []);
@@ -65,7 +79,71 @@ export default function PasscodeGate({ children }: { children: React.ReactNode }
     }
   }
 
+  function handleRememberPin() {
+    if (typeof window !== "undefined") {
+      // Save PIN to session storage to skip passcode on subsequent loads
+      sessionStorage.setItem(PIN_STORAGE_KEY, "true");
+      setPinSavedThisSession(true);
+    }
+    setShowPinSetup(false);
+    setUnlocked(true);
+  }
+
+  function handleSkipPin() {
+    // Just proceed without saving PIN
+    setShowPinSetup(false);
+  }
+
   if (unlocked) return <>{children}</>;
+
+  // Show PIN setup prompt on first visit
+  if (showPinSetup && !pinSavedThisSession) {
+    return (
+      <div
+        className="min-h-screen flex flex-col items-center justify-center"
+        style={{ background: "#f3f4f6" }}
+      >
+        <div className="bg-white rounded-2xl shadow-lg border border-border px-10 py-12 flex flex-col items-center gap-8 w-full max-w-sm">
+          {/* Logo */}
+          <img
+            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/images-SdNz6vfYoJoMVJMUFtXCjHac5xozpZ.png"
+            alt="Buzz Filing"
+            className="h-9 w-auto object-contain"
+          />
+
+          <div className="flex flex-col items-center gap-2 text-center">
+            <h1 className="text-sm font-bold tracking-wide text-foreground">
+              Save Your Access
+            </h1>
+            <p className="text-[11px] text-muted-foreground">
+              Would you like to skip the passcode on your next visit?
+            </p>
+          </div>
+
+          <div className="w-full space-y-3">
+            <Button
+              onClick={handleRememberPin}
+              className="w-full h-10 rounded-full text-xs font-bold text-white cursor-pointer"
+              style={{ background: "#e8000d" }}
+            >
+              Remember PIN for This Session
+            </Button>
+            <Button
+              onClick={handleSkipPin}
+              variant="outline"
+              className="w-full h-10 rounded-full text-xs font-bold cursor-pointer"
+            >
+              Enter Passcode Now
+            </Button>
+          </div>
+
+          <p className="text-[10px] text-muted-foreground text-center">
+            Your session will be remembered until you close the browser.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
