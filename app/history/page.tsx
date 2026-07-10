@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -13,7 +14,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { InvoiceData, CURRENCY_SYMBOLS } from "@/lib/invoice-types";
 import Link from "next/link";
-import { Trash2, Edit2, ArrowLeft } from "lucide-react";
+import { Trash2, Edit2, ArrowLeft, Search } from "lucide-react";
 
 interface StoredInvoice extends InvoiceData {
   _id: string;
@@ -22,10 +23,13 @@ interface StoredInvoice extends InvoiceData {
 }
 
 export default function HistoryPage() {
+  const router = useRouter();
   const [invoices, setInvoices] = useState<StoredInvoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [editId, setEditId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [previewId, setPreviewId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchInvoices();
@@ -64,7 +68,7 @@ export default function HistoryPage() {
   const handleEdit = (invoice: StoredInvoice) => {
     if (typeof window !== "undefined") {
       sessionStorage.setItem("editInvoice", JSON.stringify(invoice));
-      window.location.href = "/";
+      router.push("/");
     }
   };
 
@@ -110,71 +114,134 @@ export default function HistoryPage() {
             </Link>
           </div>
         ) : (
-          <div className="space-y-4">
-            {invoices.map((invoice) => {
-              const subtotal = invoice.lineItems.reduce(
-                (sum, item) => sum + item.qty * item.rate,
-                0
-              );
-              const total = subtotal - invoice.discount;
+          <div className="space-y-6">
+            {/* Search Bar */}
+            <div className="relative">
+              <Search className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search by invoice number, client, or team member..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
 
-              return (
-                <div
-                  key={invoice._id}
-                  className="border border-border rounded-lg p-4 hover:shadow-md transition-shadow"
-                >
-                  <div className="flex items-start justify-between gap-4 mb-3">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="font-semibold text-sm">
-                          Invoice #{invoice.invoiceNumber}
-                        </h3>
-                        <span className="text-xs px-2 py-1 rounded-full bg-secondary text-secondary-foreground">
-                          {invoice.paymentStatus}
-                        </span>
+            {/* Invoices Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {invoices
+                .filter((invoice) => {
+                  const query = searchQuery.toLowerCase();
+                  return (
+                    invoice.invoiceNumber.toString().includes(query) ||
+                    invoice.billTo.toLowerCase().includes(query) ||
+                    invoice.teamMember?.toLowerCase().includes(query) ||
+                    invoice.invoiceDescription?.toLowerCase().includes(query)
+                  );
+                })
+                .map((invoice) => {
+                  const subtotal = invoice.lineItems.reduce(
+                    (sum, item) => sum + item.qty * item.rate,
+                    0
+                  );
+                  const total = subtotal - invoice.discount;
+
+                  return (
+                    <div
+                      key={invoice._id}
+                      className="border border-border rounded-lg overflow-hidden hover:shadow-lg transition-shadow bg-white"
+                    >
+                      {/* Card Header */}
+                      <div className="p-4 border-b border-border">
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-sm">
+                              Invoice #{invoice.invoiceNumber}
+                            </h3>
+                          </div>
+                          <span className={`text-xs px-2 py-1 rounded-full whitespace-nowrap ${
+                            invoice.paymentStatus === "Paid"
+                              ? "bg-green-100 text-green-700"
+                              : "bg-amber-100 text-amber-700"
+                          }`}>
+                            {invoice.paymentStatus}
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(invoice.createdAt).toLocaleDateString()}
+                        </p>
                       </div>
-                      <p className="text-sm text-muted-foreground">
-                        {invoice.billTo}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {new Date(invoice.createdAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-semibold">
-                        {CURRENCY_SYMBOLS[invoice.currency]}
-                        {total.toFixed(2)}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {invoice.lineItems.length} item
-                        {invoice.lineItems.length !== 1 ? "s" : ""}
-                      </p>
-                    </div>
-                  </div>
 
-                  <div className="flex gap-2 justify-end pt-3 border-t border-border">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEdit(invoice)}
-                      className="gap-2"
-                    >
-                      <Edit2 className="w-4 h-4" />
-                      Edit
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => setDeleteId(invoice._id)}
-                      className="gap-2"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                      Delete
-                    </Button>
-                  </div>
-                </div>
+                      {/* Card Content */}
+                      <div className="p-4 space-y-3">
+                        <div>
+                          <p className="text-xs text-muted-foreground">Client</p>
+                          <p className="text-sm font-medium truncate">{invoice.billTo}</p>
+                        </div>
+
+                        {invoice.teamMember && (
+                          <div>
+                            <p className="text-xs text-muted-foreground">Team Member</p>
+                            <p className="text-sm font-medium">{invoice.teamMember}</p>
+                          </div>
+                        )}
+
+                        <div className="flex items-center justify-between pt-2 border-t border-border">
+                          <div>
+                            <p className="text-xs text-muted-foreground">Total</p>
+                            <p className="text-lg font-semibold">
+                              {CURRENCY_SYMBOLS[invoice.currency]}
+                              {total.toFixed(2)}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xs text-muted-foreground">Items</p>
+                            <p className="text-lg font-semibold">
+                              {invoice.lineItems.length}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Card Footer - Actions */}
+                      <div className="px-4 py-3 bg-gray-50 border-t border-border flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEdit(invoice)}
+                          className="flex-1 gap-2 cursor-pointer"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                          Edit
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => setDeleteId(invoice._id)}
+                          className="flex-1 gap-2 cursor-pointer"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          Delete
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+
+            {invoices.filter((invoice) => {
+              const query = searchQuery.toLowerCase();
+              return (
+                invoice.invoiceNumber.toString().includes(query) ||
+                invoice.billTo.toLowerCase().includes(query) ||
+                invoice.teamMember?.toLowerCase().includes(query) ||
+                invoice.invoiceDescription?.toLowerCase().includes(query)
               );
-            })}
+            }).length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">No invoices match your search</p>
+              </div>
+            )}
           </div>
         )}
       </main>

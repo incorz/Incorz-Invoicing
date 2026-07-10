@@ -11,17 +11,26 @@ export async function POST(req: Request) {
     const invoices = db.collection("invoices");
 
     if (body._id) {
-      // Update existing invoice
+      // Update existing invoice - exclude _id from the update
+      const { _id, ...updateData } = body;
       const result = await invoices.updateOne(
-        { _id: new ObjectId(body._id) },
+        { _id: new ObjectId(_id) },
         {
           $set: {
-            ...body,
+            ...updateData,
             updatedAt: new Date(),
           },
         }
       );
-      return Response.json({ success: true, _id: body._id });
+      
+      if (result.matchedCount === 0) {
+        return Response.json(
+          { error: "Invoice not found" },
+          { status: 404 }
+        );
+      }
+      
+      return Response.json({ success: true, _id });
     } else {
       // Create new invoice
       const result = await invoices.insertOne({
