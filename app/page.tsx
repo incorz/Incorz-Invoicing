@@ -146,6 +146,40 @@ export default function Home() {
     }
   }, []);
 
+  const handleSave = useCallback(async () => {
+    try {
+      const res = await fetch("/api/invoices/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(invoiceData),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        alert("Invoice saved successfully!");
+      }
+    } catch (error) {
+      console.error("[v0] Failed to save invoice:", error);
+      alert("Failed to save invoice");
+    }
+  }, [invoiceData]);
+
+  useEffect(() => {
+    // Check if there's an invoice to edit from history
+    if (typeof window !== "undefined" && mounted) {
+      const editInvoice = sessionStorage.getItem("editInvoice");
+      if (editInvoice) {
+        try {
+          const invoice = JSON.parse(editInvoice) as InvoiceData & { _id: string };
+          setInvoiceData(invoice);
+          sessionStorage.removeItem("editInvoice");
+        } catch (error) {
+          console.error("[v0] Failed to parse edit invoice:", error);
+        }
+      }
+    }
+  }, [mounted]);
+
   return (
     <PasscodeGate>
     <div className="min-h-screen bg-background flex flex-col">
@@ -161,12 +195,20 @@ export default function Home() {
           <span className="text-[10px] font-semibold tracking-[0.2em] uppercase text-muted-foreground hidden sm:block">
             Invoice Generator
           </span>
-          <span
-            className="text-[10px] font-bold text-white px-3 py-1 rounded-full tabular-nums flex-shrink-0"
-            style={{ background: "linear-gradient(135deg, #ff0d13 0%, #ff6b00 100%)" }}
-          >
-            #{invoiceData.invoiceNumber}
-          </span>
+          <div className="flex items-center gap-3">
+            <a
+              href="/history"
+              className="text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
+            >
+              History
+            </a>
+            <span
+              className="text-[10px] font-bold text-white px-3 py-1 rounded-full tabular-nums flex-shrink-0"
+              style={{ background: "linear-gradient(135deg, #ff0d13 0%, #ff6b00 100%)" }}
+            >
+              #{invoiceData.invoiceNumber}
+            </span>
+          </div>
         </div>
       </header>
 
@@ -180,6 +222,7 @@ export default function Home() {
             setData={setInvoiceData}
             onDownload={handleDownload}
             onReset={handleReset}
+            onSave={handleSave}
             invoiceNumLoading={invoiceNumLoading}
           />
         </aside>
