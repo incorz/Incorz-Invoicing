@@ -57,11 +57,20 @@ export default function HistoryPage() {
       });
 
       if (res.ok) {
+        // Remove from local state immediately for instant UI update
         setInvoices((prev) => prev.filter((inv) => inv._id !== id));
         setDeleteId(null);
+        
+        // Refetch to ensure server state is in sync
+        setTimeout(() => {
+          fetchInvoices();
+        }, 500);
+      } else {
+        alert("Failed to delete invoice");
       }
     } catch (error) {
       console.error("[v0] Failed to delete invoice:", error);
+      alert("Error deleting invoice");
     }
   };
 
