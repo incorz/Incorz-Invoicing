@@ -37,6 +37,7 @@ export default function Home() {
   const [invoiceNumLoading, setInvoiceNumLoading] = useState(true);
   const [saveModalOpen, setSaveModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
   const downloadingRef = useRef(false);
 
   const previewRef = useRef<HTMLDivElement>(null);
@@ -149,6 +150,12 @@ export default function Home() {
     }
   }, []);
 
+  const handleCreateNew = useCallback(() => {
+    // Exit edit mode and create a fresh invoice
+    setIsEditMode(false);
+    handleReset();
+  }, [handleReset]);
+
   const handleSave = useCallback(() => {
     setSaveModalOpen(true);
   }, []);
@@ -195,6 +202,7 @@ export default function Home() {
         try {
           const invoice = JSON.parse(editInvoice) as InvoiceData & { _id: string };
           setInvoiceData(invoice);
+          setIsEditMode(true);
           sessionStorage.removeItem("editInvoice");
         } catch (error) {
           console.error("[v0] Failed to parse edit invoice:", error);
@@ -247,6 +255,8 @@ export default function Home() {
             onReset={handleReset}
             onSave={handleSave}
             invoiceNumLoading={invoiceNumLoading}
+            isEditMode={isEditMode}
+            onCreateNew={handleCreateNew}
           />
         </aside>
 
