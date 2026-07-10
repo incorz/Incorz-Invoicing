@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import InvoiceForm from "@/components/invoice-form";
 import InvoicePreview from "@/components/invoice-preview";
 import PasscodeGate from "@/components/passcode-gate";
+import { SaveInvoiceModal } from "@/components/save-invoice-modal";
 import { InvoiceData, DEFAULT_INVOICE } from "@/lib/invoice-types";
 
 const FORM_DATA_KEY = "buzz_filing_form_data";
@@ -34,6 +35,8 @@ export default function Home() {
 
   const [mounted, setMounted] = useState(false);
   const [invoiceNumLoading, setInvoiceNumLoading] = useState(true);
+  const [saveModalOpen, setSaveModalOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const downloadingRef = useRef(false);
 
   const previewRef = useRef<HTMLDivElement>(null);
@@ -65,25 +68,6 @@ export default function Home() {
     if (mounted) {
       saveFormData(invoiceData);
     }
-  }, [invoiceData, mounted]);
-
-  // Auto-save to database every 30 seconds if data has changed
-  useEffect(() => {
-    if (!mounted) return;
-
-    const autoSaveInterval = setInterval(async () => {
-      try {
-        await fetch("/api/invoices/save", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(invoiceData),
-        });
-      } catch (error) {
-        console.error("[v0] Auto-save failed:", error);
-      }
-    }, 30000); // Auto-save every 30 seconds
-
-    return () => clearInterval(autoSaveInterval);
   }, [invoiceData, mounted]);
 
   const handleDownload = useCallback(async () => {
@@ -165,23 +149,39 @@ export default function Home() {
     }
   }, []);
 
-  const handleSave = useCallback(async () => {
-    try {
-      const res = await fetch("/api/invoices/save", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(invoiceData),
-      });
+  const handleSave = useCallback(() => {
+    setSaveModalOpen(true);
+  }, []);
 
-      if (res.ok) {
-        const data = await res.json();
-        alert("Invoice saved successfully!");
+  const handleSaveWithDetails = useCallback(
+    async (details: { teamMember: string; description: string }) => {
+      setIsSaving(true);
+      try {
+        const res = await fetch("/api/invoices/save", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...invoiceData,
+            teamMember: details.teamMember,
+            invoiceDescription: details.description,
+          }),
+        });
+
+        if (res.ok) {
+          alert("Invoice saved successfully!");
+          setSaveModalOpen(false);
+        } else {
+          alert("Failed to save invoice");
+        }
+      } catch (error) {
+        console.error("[v0] Failed to save invoice:", error);
+        alert("Failed to save invoice");
+      } finally {
+        setIsSaving(false);
       }
-    } catch (error) {
-      console.error("[v0] Failed to save invoice:", error);
-      alert("Failed to save invoice");
-    }
-  }, [invoiceData]);
+    },
+    [invoiceData]
+  );
 
   useEffect(() => {
     // Check if there's an invoice to edit from history
@@ -268,6 +268,14 @@ export default function Home() {
         </main>
 
       </div>
+
+      {/* Save Invoice Modal */}
+      <SaveInvoiceModal
+        open={saveModalOpen}
+        onOpenChange={setSaveModalOpen}
+        onSave={handleSaveWithDetails}
+        isSaving={isSaving}
+      />
     </div>
     </PasscodeGate>
   );
