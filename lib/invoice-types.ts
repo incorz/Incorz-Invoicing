@@ -21,6 +21,8 @@ export interface InvoiceData {
   discount: number;
   paymentReceived: number;
   paymentTerms: string;
+  teamMember?: string;
+  invoiceDescription?: string;
 }
 
 export const COMPANY_INFO = {

@@ -20,6 +20,7 @@ interface InvoiceFormProps {
   setData: Dispatch<SetStateAction<InvoiceData>>;
   onDownload: () => void;
   onReset: () => void;
+  onSave: () => void;
   invoiceNumLoading?: boolean;
 }
 
@@ -28,6 +29,7 @@ export default function InvoiceForm({
   setData,
   onDownload,
   onReset,
+  onSave,
   invoiceNumLoading = false,
 }: InvoiceFormProps) {
   const updateField = <K extends keyof InvoiceData>(key: K, value: InvoiceData[K]) => {
@@ -315,6 +317,13 @@ export default function InvoiceForm({
           onClick={onDownload}
         >
           Download PDF
+        </Button>
+        <Button
+          variant="outline"
+          className="w-full h-9 rounded-full cursor-pointer text-xs text-muted-foreground border-border hover:bg-secondary"
+          onClick={onSave}
+        >
+          Save Invoice
         </Button>
         <Button
           variant="outline"

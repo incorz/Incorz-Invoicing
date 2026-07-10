@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import InvoiceForm from "@/components/invoice-form";
 import InvoicePreview from "@/components/invoice-preview";
 import PasscodeGate from "@/components/passcode-gate";
+import { SaveInvoiceModal } from "@/components/save-invoice-modal";
 import { InvoiceData, DEFAULT_INVOICE } from "@/lib/invoice-types";
 
 const FORM_DATA_KEY = "buzz_filing_form_data";
@@ -34,6 +35,8 @@ export default function Home() {
 
   const [mounted, setMounted] = useState(false);
   const [invoiceNumLoading, setInvoiceNumLoading] = useState(true);
+  const [saveModalOpen, setSaveModalOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const downloadingRef = useRef(false);
 
   const previewRef = useRef<HTMLDivElement>(null);
@@ -146,6 +149,56 @@ export default function Home() {
     }
   }, []);
 
+  const handleSave = useCallback(() => {
+    setSaveModalOpen(true);
+  }, []);
+
+  const handleSaveWithDetails = useCallback(
+    async (details: { teamMember: string; description: string }) => {
+      setIsSaving(true);
+      try {
+        const res = await fetch("/api/invoices/save", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...invoiceData,
+            teamMember: details.teamMember,
+            invoiceDescription: details.description,
+          }),
+        });
+
+        if (res.ok) {
+          alert("Invoice saved successfully!");
+          setSaveModalOpen(false);
+        } else {
+          alert("Failed to save invoice");
+        }
+      } catch (error) {
+        console.error("[v0] Failed to save invoice:", error);
+        alert("Failed to save invoice");
+      } finally {
+        setIsSaving(false);
+      }
+    },
+    [invoiceData]
+  );
+
+  useEffect(() => {
+    // Check if there's an invoice to edit from history
+    if (typeof window !== "undefined" && mounted) {
+      const editInvoice = sessionStorage.getItem("editInvoice");
+      if (editInvoice) {
+        try {
+          const invoice = JSON.parse(editInvoice) as InvoiceData & { _id: string };
+          setInvoiceData(invoice);
+          sessionStorage.removeItem("editInvoice");
+        } catch (error) {
+          console.error("[v0] Failed to parse edit invoice:", error);
+        }
+      }
+    }
+  }, [mounted]);
+
   return (
     <PasscodeGate>
     <div className="min-h-screen bg-background flex flex-col">
@@ -161,12 +214,20 @@ export default function Home() {
           <span className="text-[10px] font-semibold tracking-[0.2em] uppercase text-muted-foreground hidden sm:block">
             Invoice Generator
           </span>
-          <span
-            className="text-[10px] font-bold text-white px-3 py-1 rounded-full tabular-nums flex-shrink-0"
-            style={{ background: "linear-gradient(135deg, #ff0d13 0%, #ff6b00 100%)" }}
-          >
-            #{invoiceData.invoiceNumber}
-          </span>
+          <div className="flex items-center gap-3">
+            <a
+              href="/history"
+              className="text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
+            >
+              History
+            </a>
+            <span
+              className="text-[10px] font-bold text-white px-3 py-1 rounded-full tabular-nums flex-shrink-0"
+              style={{ background: "linear-gradient(135deg, #ff0d13 0%, #ff6b00 100%)" }}
+            >
+              #{invoiceData.invoiceNumber}
+            </span>
+          </div>
         </div>
       </header>
 
@@ -180,6 +241,7 @@ export default function Home() {
             setData={setInvoiceData}
             onDownload={handleDownload}
             onReset={handleReset}
+            onSave={handleSave}
             invoiceNumLoading={invoiceNumLoading}
           />
         </aside>
@@ -206,6 +268,14 @@ export default function Home() {
         </main>
 
       </div>
+
+      {/* Save Invoice Modal */}
+      <SaveInvoiceModal
+        open={saveModalOpen}
+        onOpenChange={setSaveModalOpen}
+        onSave={handleSaveWithDetails}
+        isSaving={isSaving}
+      />
     </div>
     </PasscodeGate>
   );

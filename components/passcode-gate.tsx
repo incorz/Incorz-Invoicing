@@ -13,6 +13,14 @@ export default function PasscodeGate({ children }: { children: React.ReactNode }
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
+    // Auto-unlock if editInvoice is in sessionStorage (coming from history page)
+    if (typeof window !== "undefined") {
+      const editInvoice = sessionStorage.getItem("editInvoice");
+      if (editInvoice) {
+        setUnlocked(true);
+        return;
+      }
+    }
     inputRefs.current[0]?.focus();
   }, []);
 
