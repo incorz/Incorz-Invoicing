@@ -22,6 +22,8 @@ interface InvoiceFormProps {
   onReset: () => void;
   onSave: () => void;
   invoiceNumLoading?: boolean;
+  isEditMode?: boolean;
+  onCreateNew?: () => void;
 }
 
 export default function InvoiceForm({
@@ -31,6 +33,8 @@ export default function InvoiceForm({
   onReset,
   onSave,
   invoiceNumLoading = false,
+  isEditMode = false,
+  onCreateNew,
 }: InvoiceFormProps) {
   const updateField = <K extends keyof InvoiceData>(key: K, value: InvoiceData[K]) => {
     setData((prev) => ({ ...prev, [key]: value }));
@@ -332,6 +336,15 @@ export default function InvoiceForm({
         >
           Reset Form
         </Button>
+        {isEditMode && onCreateNew && (
+          <Button
+            className="w-full h-9 rounded-full cursor-pointer text-xs font-semibold text-white border-0 transition-opacity hover:opacity-90"
+            style={{ background: "#e8000d" }}
+            onClick={onCreateNew}
+          >
+            Create New Invoice
+          </Button>
+        )}
       </div>
 
     </div>

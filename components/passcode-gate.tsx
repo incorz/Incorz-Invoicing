@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, KeyboardEvent } from "react";
 
 const CORRECT = "2668";
 const DIGITS = 4;
+const PIN_VERIFIED_KEY = "buzz_filing_pin_verified";
 
 export default function PasscodeGate({ children }: { children: React.ReactNode }) {
   const [unlocked, setUnlocked] = useState(false);
@@ -20,6 +21,13 @@ export default function PasscodeGate({ children }: { children: React.ReactNode }
         setUnlocked(true);
         return;
       }
+
+      // Check if PIN was already verified in this session
+      const pinVerified = sessionStorage.getItem(PIN_VERIFIED_KEY);
+      if (pinVerified === "true") {
+        setUnlocked(true);
+        return;
+      }
     }
     inputRefs.current[0]?.focus();
   }, []);
@@ -33,12 +41,12 @@ export default function PasscodeGate({ children }: { children: React.ReactNode }
 
     if (digit && index < DIGITS - 1) {
       inputRefs.current[index + 1]?.focus();
-    }
-
-    // Auto-submit when all filled
-    if (digit && index === DIGITS - 1) {
-      const full = [...next].join("");
-      if (full.length === DIGITS) submit(full);
+    } else if (digit && index === DIGITS - 1) {
+      // Auto-submit when last digit is entered
+      const full = next.join("");
+      if (full.length === DIGITS && full.every(d => d !== "")) {
+        setTimeout(() => submit(full), 100);
+      }
     }
   }
 
@@ -53,8 +61,13 @@ export default function PasscodeGate({ children }: { children: React.ReactNode }
 
   function submit(full: string) {
     if (full === CORRECT) {
+      // PIN is correct - save verification to session storage and unlock
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem(PIN_VERIFIED_KEY, "true");
+      }
       setUnlocked(true);
     } else {
+      // PIN is incorrect - show error
       setShake(true);
       setError(true);
       setCode(Array(DIGITS).fill(""));
@@ -67,7 +80,11 @@ export default function PasscodeGate({ children }: { children: React.ReactNode }
 
   if (unlocked) return <>{children}</>;
 
+  const title = "Enter Passcode";
+  const subtitle = "This tool is protected. Enter your passcode to continue.";
+
   return (
+
     <div
       className="min-h-screen flex flex-col items-center justify-center"
       style={{ background: "#f3f4f6" }}
@@ -82,10 +99,10 @@ export default function PasscodeGate({ children }: { children: React.ReactNode }
 
         <div className="flex flex-col items-center gap-1 text-center">
           <h1 className="text-sm font-bold tracking-wide text-foreground">
-            Enter Passcode
+            {title}
           </h1>
           <p className="text-[11px] text-muted-foreground">
-            This tool is protected. Enter your passcode to continue.
+            {subtitle}
           </p>
         </div>
 
@@ -104,7 +121,7 @@ export default function PasscodeGate({ children }: { children: React.ReactNode }
               value={code[i]}
               onChange={(e) => handleChange(i, e.target.value)}
               onKeyDown={(e) => handleKeyDown(i, e)}
-              className="w-12 h-14 text-center text-xl font-bold rounded-xl border-2 outline-none transition-all"
+              className="w-12 h-14 text-center text-xl font-bold rounded-xl border-2 outline-none transition-all cursor-pointer"
               style={{
                 borderColor: error ? "#e8000d" : code[i] ? "#e8000d" : "#e8e8e8",
                 color: "#000000",
@@ -124,7 +141,7 @@ export default function PasscodeGate({ children }: { children: React.ReactNode }
         {/* Submit */}
         <button
           onClick={() => submit(code.join(""))}
-          className="w-full h-10 rounded-full text-xs font-bold text-white transition-opacity hover:opacity-90 active:opacity-75"
+          className="w-full h-10 rounded-full text-xs font-bold text-white transition-opacity hover:opacity-90 active:opacity-75 cursor-pointer"
           style={{ background: "#e8000d" }}
         >
           Unlock
