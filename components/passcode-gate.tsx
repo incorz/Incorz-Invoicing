@@ -3,17 +3,17 @@
 import { useState, useRef, useEffect, KeyboardEvent } from "react";
 import { Button } from "@/components/ui/button";
 
-const CORRECT = "2668";
 const DIGITS = 4;
-const PIN_STORAGE_KEY = "buzz_filing_pin_saved";
+const PIN_STORAGE_KEY = "buzz_filing_user_pin";
+const PIN_VERIFIED_KEY = "buzz_filing_pin_verified";
 
 export default function PasscodeGate({ children }: { children: React.ReactNode }) {
   const [unlocked, setUnlocked] = useState(false);
   const [code, setCode] = useState<string[]>(Array(DIGITS).fill(""));
   const [error, setError] = useState(false);
   const [shake, setShake] = useState(false);
-  const [showPinSetup, setShowPinSetup] = useState(false);
-  const [pinSavedThisSession, setPinSavedThisSession] = useState(false);
+  const [mode, setMode] = useState<"setup" | "verify">("setup"); // setup = create PIN, verify = enter PIN
+  const [pinCreated, setPinCreated] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
@@ -25,15 +25,22 @@ export default function PasscodeGate({ children }: { children: React.ReactNode }
         return;
       }
 
-      // Check if PIN was already saved in this session
-      const pinSaved = sessionStorage.getItem(PIN_STORAGE_KEY);
-      if (pinSaved === "true") {
+      // Check if PIN was already verified in this session
+      const pinVerified = sessionStorage.getItem(PIN_VERIFIED_KEY);
+      if (pinVerified === "true") {
         setUnlocked(true);
         return;
       }
 
-      // First time - show PIN setup option
-      setShowPinSetup(true);
+      // Check if user has a saved PIN
+      const savedPin = sessionStorage.getItem(PIN_STORAGE_KEY);
+      if (savedPin) {
+        // User needs to verify their PIN
+        setMode("verify");
+      } else {
+        // First time - show PIN setup
+        setMode("setup");
+      }
     }
     inputRefs.current[0]?.focus();
   }, []);
@@ -47,12 +54,12 @@ export default function PasscodeGate({ children }: { children: React.ReactNode }
 
     if (digit && index < DIGITS - 1) {
       inputRefs.current[index + 1]?.focus();
-    }
-
-    // Auto-submit when all filled
-    if (digit && index === DIGITS - 1) {
-      const full = [...next].join("");
-      if (full.length === DIGITS) submit(full);
+    } else if (digit && index === DIGITS - 1) {
+      // Auto-submit when last digit is entered
+      const full = next.join("");
+      if (full.length === DIGITS && full.every(d => d !== "")) {
+        setTimeout(() => submit(full), 100);
+      }
     }
   }
 
@@ -66,86 +73,47 @@ export default function PasscodeGate({ children }: { children: React.ReactNode }
   }
 
   function submit(full: string) {
-    if (full === CORRECT) {
-      setUnlocked(true);
-    } else {
-      setShake(true);
-      setError(true);
-      setCode(Array(DIGITS).fill(""));
-      setTimeout(() => {
-        setShake(false);
-        inputRefs.current[0]?.focus();
-      }, 600);
+    if (mode === "setup") {
+      // Creating new PIN
+      if (full.length === DIGITS) {
+        if (typeof window !== "undefined") {
+          // Save user's custom PIN to session storage
+          sessionStorage.setItem(PIN_STORAGE_KEY, full);
+          sessionStorage.setItem(PIN_VERIFIED_KEY, "true");
+        }
+        setUnlocked(true);
+      }
+    } else if (mode === "verify") {
+      // Verifying existing PIN
+      const savedPin = typeof window !== "undefined" ? sessionStorage.getItem(PIN_STORAGE_KEY) : null;
+      
+      if (full === savedPin) {
+        if (typeof window !== "undefined") {
+          sessionStorage.setItem(PIN_VERIFIED_KEY, "true");
+        }
+        setUnlocked(true);
+      } else {
+        setShake(true);
+        setError(true);
+        setCode(Array(DIGITS).fill(""));
+        setTimeout(() => {
+          setShake(false);
+          inputRefs.current[0]?.focus();
+        }, 600);
+      }
     }
-  }
-
-  function handleRememberPin() {
-    if (typeof window !== "undefined") {
-      // Save PIN to session storage to skip passcode on subsequent loads
-      sessionStorage.setItem(PIN_STORAGE_KEY, "true");
-      setPinSavedThisSession(true);
-    }
-    setShowPinSetup(false);
-    setUnlocked(true);
-  }
-
-  function handleSkipPin() {
-    // Just proceed without saving PIN
-    setShowPinSetup(false);
   }
 
   if (unlocked) return <>{children}</>;
 
-  // Show PIN setup prompt on first visit
-  if (showPinSetup && !pinSavedThisSession) {
-    return (
-      <div
-        className="min-h-screen flex flex-col items-center justify-center"
-        style={{ background: "#f3f4f6" }}
-      >
-        <div className="bg-white rounded-2xl shadow-lg border border-border px-10 py-12 flex flex-col items-center gap-8 w-full max-w-sm">
-          {/* Logo */}
-          <img
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/images-SdNz6vfYoJoMVJMUFtXCjHac5xozpZ.png"
-            alt="Buzz Filing"
-            className="h-9 w-auto object-contain"
-          />
-
-          <div className="flex flex-col items-center gap-2 text-center">
-            <h1 className="text-sm font-bold tracking-wide text-foreground">
-              Save Your Access
-            </h1>
-            <p className="text-[11px] text-muted-foreground">
-              Would you like to skip the passcode on your next visit?
-            </p>
-          </div>
-
-          <div className="w-full space-y-3">
-            <Button
-              onClick={handleRememberPin}
-              className="w-full h-10 rounded-full text-xs font-bold text-white cursor-pointer"
-              style={{ background: "#e8000d" }}
-            >
-              Remember PIN for This Session
-            </Button>
-            <Button
-              onClick={handleSkipPin}
-              variant="outline"
-              className="w-full h-10 rounded-full text-xs font-bold cursor-pointer"
-            >
-              Enter Passcode Now
-            </Button>
-          </div>
-
-          <p className="text-[10px] text-muted-foreground text-center">
-            Your session will be remembered until you close the browser.
-          </p>
-        </div>
-      </div>
-    );
-  }
+  const isSetupMode = mode === "setup";
+  const title = isSetupMode ? "Create Your PIN" : "Enter Your PIN";
+  const subtitle = isSetupMode 
+    ? "Set a 4-digit PIN to secure your access. You'll use this PIN in future sessions."
+    : "Enter your PIN to continue. It will be remembered for this session.";
 
   return (
+
     <div
       className="min-h-screen flex flex-col items-center justify-center"
       style={{ background: "#f3f4f6" }}
@@ -160,10 +128,10 @@ export default function PasscodeGate({ children }: { children: React.ReactNode }
 
         <div className="flex flex-col items-center gap-1 text-center">
           <h1 className="text-sm font-bold tracking-wide text-foreground">
-            Enter Passcode
+            {title}
           </h1>
           <p className="text-[11px] text-muted-foreground">
-            This tool is protected. Enter your passcode to continue.
+            {subtitle}
           </p>
         </div>
 
@@ -182,7 +150,7 @@ export default function PasscodeGate({ children }: { children: React.ReactNode }
               value={code[i]}
               onChange={(e) => handleChange(i, e.target.value)}
               onKeyDown={(e) => handleKeyDown(i, e)}
-              className="w-12 h-14 text-center text-xl font-bold rounded-xl border-2 outline-none transition-all"
+              className="w-12 h-14 text-center text-xl font-bold rounded-xl border-2 outline-none transition-all cursor-pointer"
               style={{
                 borderColor: error ? "#e8000d" : code[i] ? "#e8000d" : "#e8e8e8",
                 color: "#000000",
@@ -195,18 +163,24 @@ export default function PasscodeGate({ children }: { children: React.ReactNode }
         {/* Error */}
         {error && (
           <p className="text-[11px] font-semibold" style={{ color: "#e8000d" }}>
-            Incorrect passcode. Please try again.
+            {isSetupMode ? "Please enter a 4-digit PIN." : "Incorrect PIN. Please try again."}
           </p>
         )}
 
         {/* Submit */}
         <button
           onClick={() => submit(code.join(""))}
-          className="w-full h-10 rounded-full text-xs font-bold text-white transition-opacity hover:opacity-90 active:opacity-75"
+          className="w-full h-10 rounded-full text-xs font-bold text-white transition-opacity hover:opacity-90 active:opacity-75 cursor-pointer"
           style={{ background: "#e8000d" }}
         >
-          Unlock
+          {isSetupMode ? "Create PIN" : "Unlock"}
         </button>
+
+        {isSetupMode && (
+          <p className="text-[10px] text-muted-foreground text-center">
+            Your PIN will be saved and remembered for this session.
+          </p>
+        )}
       </div>
 
       <style>{`
