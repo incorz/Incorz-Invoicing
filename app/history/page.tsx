@@ -108,8 +108,7 @@ export default function HistoryPage() {
               Back
             </Button>
           </Link>
-          <h1 className="text-lg font-semibold">Invoice History</h1>
-          <div className="w-20" />
+          <div className="flex-1" />
         </div>
       </header>
 
