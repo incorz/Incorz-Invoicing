@@ -67,6 +67,25 @@ export default function Home() {
     }
   }, [invoiceData, mounted]);
 
+  // Auto-save to database every 30 seconds if data has changed
+  useEffect(() => {
+    if (!mounted) return;
+
+    const autoSaveInterval = setInterval(async () => {
+      try {
+        await fetch("/api/invoices/save", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(invoiceData),
+        });
+      } catch (error) {
+        console.error("[v0] Auto-save failed:", error);
+      }
+    }, 30000); // Auto-save every 30 seconds
+
+    return () => clearInterval(autoSaveInterval);
+  }, [invoiceData, mounted]);
+
   const handleDownload = useCallback(async () => {
     if (downloadingRef.current) return; // prevent double-fire
     if (!invoiceData.billTo.trim()) {
