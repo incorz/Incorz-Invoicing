@@ -157,25 +157,29 @@ export default function Home() {
     async (details: { teamMember: string; description: string }) => {
       setIsSaving(true);
       try {
+        const saveData = {
+          ...invoiceData,
+          teamMember: details.teamMember,
+          invoiceDescription: details.description,
+        };
+
         const res = await fetch("/api/invoices/save", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            ...invoiceData,
-            teamMember: details.teamMember,
-            invoiceDescription: details.description,
-          }),
+          body: JSON.stringify(saveData),
         });
 
         if (res.ok) {
+          const data = await res.json();
           alert("Invoice saved successfully!");
           setSaveModalOpen(false);
         } else {
-          alert("Failed to save invoice");
+          const errorData = await res.json().catch(() => ({}));
+          alert("Failed to save invoice: " + (errorData.error || "Unknown error"));
         }
       } catch (error) {
         console.error("[v0] Failed to save invoice:", error);
-        alert("Failed to save invoice");
+        alert("Failed to save invoice: " + (error instanceof Error ? error.message : "Unknown error"));
       } finally {
         setIsSaving(false);
       }

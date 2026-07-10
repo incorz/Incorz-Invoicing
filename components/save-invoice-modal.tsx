@@ -36,15 +36,18 @@ export function SaveInvoiceModal({
       return;
     }
 
-    await onSave({
-      teamMember: teamMember.trim(),
-      description: description.trim(),
-    });
+    try {
+      await onSave({
+        teamMember: teamMember.trim(),
+        description: description.trim(),
+      });
 
-    // Reset form
-    setTeamMember("");
-    setDescription("");
-    onOpenChange(false);
+      // Reset form after successful save
+      setTeamMember("");
+      setDescription("");
+    } catch (error) {
+      console.error("[v0] Error in save modal:", error);
+    }
   };
 
   return (
