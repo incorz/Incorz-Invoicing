@@ -156,6 +156,28 @@ export default function Home() {
     handleReset();
   }, [handleReset]);
 
+  // Auto-save invoice when user fills team member and has line items
+  useEffect(() => {
+    const autoSaveTimer = setTimeout(() => {
+      // Only auto-save if invoice has team member name and line items with description
+      if (invoiceData.teamMember && invoiceData.lineItems.some(item => item.description)) {
+        const saveData = {
+          ...invoiceData,
+        };
+
+        fetch("/api/invoices/save", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(saveData),
+        }).catch((error) => {
+          console.error("[v0] Auto-save failed:", error);
+        });
+      }
+    }, 2000); // Auto-save after 2 seconds of inactivity
+
+    return () => clearTimeout(autoSaveTimer);
+  }, [invoiceData]);
+
   const handleSave = useCallback(() => {
     setSaveModalOpen(true);
   }, []);

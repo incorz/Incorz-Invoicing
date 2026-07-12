@@ -135,6 +135,17 @@ export default function InvoiceForm({
         </div>
 
         <div className="flex flex-col gap-1.5">
+          <Label htmlFor="teamMember" className="text-xs">Team Member</Label>
+          <Input
+            id="teamMember"
+            placeholder="Team member name (for auto-save)"
+            value={data.teamMember || ""}
+            onChange={(e) => updateField("teamMember", e.target.value)}
+            className="field-input h-9"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
           <Label htmlFor="invoiceBy" className="text-xs">Invoice By</Label>
           <Input
             id="invoiceBy"
@@ -321,13 +332,6 @@ export default function InvoiceForm({
           onClick={onDownload}
         >
           Download PDF
-        </Button>
-        <Button
-          variant="outline"
-          className="w-full h-9 rounded-full cursor-pointer text-xs text-muted-foreground border-border hover:bg-secondary"
-          onClick={onSave}
-        >
-          Save Invoice
         </Button>
         <Button
           variant="outline"
