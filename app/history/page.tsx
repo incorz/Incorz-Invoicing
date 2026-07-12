@@ -109,6 +109,11 @@ export default function HistoryPage() {
             </Button>
           </Link>
           <div className="flex-1" />
+          <Link href="/">
+            <Button size="sm" className="cursor-pointer" style={{ background: "#e8000d" }}>
+              Create New Invoice
+            </Button>
+          </Link>
         </div>
       </header>
 
