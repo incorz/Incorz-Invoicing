@@ -110,6 +110,17 @@ export default function Home() {
     const resolvedName = `${invoiceData.billTo.trim()} - ${invoiceData.serviceType} - Invoice ${invoiceData.invoiceNumber}`;
     pdf.save(`${resolvedName}.pdf`);
 
+    // Save the invoice to MongoDB on download so every downloaded invoice is persisted
+    try {
+      await fetch("/api/invoices/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(invoiceData),
+      });
+    } catch (error) {
+      console.error("[v0] Failed to save invoice on download:", error);
+    }
+
     // Increment counter in MongoDB and update local state with new number
     fetch("/api/invoice-number", { method: "POST" })
       .then((r) => r.json())
