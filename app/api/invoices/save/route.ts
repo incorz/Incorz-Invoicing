@@ -33,8 +33,9 @@ export async function POST(req: Request) {
       return Response.json({ success: true, _id });
     } else {
       // Create new invoice
+      const { _id: ignoredId, ...invoiceData } = body;
       const result = await invoices.insertOne({
-        ...body,
+        ...invoiceData,
         createdAt: new Date(),
         updatedAt: new Date(),
       });

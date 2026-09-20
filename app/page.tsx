@@ -127,6 +127,7 @@ export default function Home() {
   const handleReset = useCallback(() => {
     const fresh: InvoiceData = {
       ...DEFAULT_INVOICE,
+      invoiceNumber: 2100,
       lineItems: [
         {
           id: crypto.randomUUID(),
@@ -141,7 +142,7 @@ export default function Home() {
     fetch("/api/invoice-number")
       .then((r) => r.json())
       .then(({ invoiceNumber }) => {
-        setInvoiceData({ ...fresh, invoiceNumber: typeof invoiceNumber === "number" ? invoiceNumber : DEFAULT_INVOICE.invoiceNumber });
+        setInvoiceData({ ...fresh, invoiceNumber: typeof invoiceNumber === "number" ? invoiceNumber : 2100 });
       })
       .catch(() => setInvoiceData(fresh));
 
@@ -181,6 +182,26 @@ export default function Home() {
   const handleSave = useCallback(() => {
     setSaveModalOpen(true);
   }, []);
+
+  const handleSendInvoice = useCallback(async () => {
+    if (!invoiceData.clientEmail?.trim()) {
+      alert("Please enter the client's email address first.");
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/invoices/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(invoiceData),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Unable to send invoice");
+      alert(`Invoice sent to ${invoiceData.clientEmail}.`);
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Unable to send invoice");
+    }
+  }, [invoiceData]);
 
   const handleSaveWithDetails = useCallback(
     async (details: { teamMember: string; description: string }) => {
@@ -276,6 +297,7 @@ export default function Home() {
             onDownload={handleDownload}
             onReset={handleReset}
             onSave={handleSave}
+            onSendInvoice={handleSendInvoice}
             invoiceNumLoading={invoiceNumLoading}
             isEditMode={isEditMode}
             onCreateNew={handleCreateNew}

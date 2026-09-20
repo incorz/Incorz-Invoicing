@@ -44,7 +44,7 @@ export default function PasscodeGate({ children }: { children: React.ReactNode }
     } else if (digit && index === DIGITS - 1) {
       // Auto-submit when last digit is entered
       const full = next.join("");
-      if (full.length === DIGITS && full.every(d => d !== "")) {
+      if (full.length === DIGITS) {
         setTimeout(() => submit(full), 100);
       }
     }

@@ -21,6 +21,7 @@ interface InvoiceFormProps {
   onDownload: () => void;
   onReset: () => void;
   onSave: () => void;
+  onSendInvoice: () => void;
   invoiceNumLoading?: boolean;
   isEditMode?: boolean;
   onCreateNew?: () => void;
@@ -32,6 +33,7 @@ export default function InvoiceForm({
   onDownload,
   onReset,
   onSave,
+  onSendInvoice,
   invoiceNumLoading = false,
   isEditMode = false,
   onCreateNew,
@@ -141,6 +143,18 @@ export default function InvoiceForm({
             placeholder="Team member name (for auto-save)"
             value={data.teamMember || ""}
             onChange={(e) => updateField("teamMember", e.target.value)}
+            className="field-input h-9"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="clientEmail" className="text-xs">Client Email</Label>
+          <Input
+            id="clientEmail"
+            type="email"
+            placeholder="client@example.com"
+            value={data.clientEmail || ""}
+            onChange={(e) => updateField("clientEmail", e.target.value)}
             className="field-input h-9"
           />
         </div>
@@ -332,6 +346,13 @@ export default function InvoiceForm({
           onClick={onDownload}
         >
           Download PDF
+        </Button>
+        <Button
+          variant="outline"
+          className="w-full h-9 rounded-full cursor-pointer text-xs font-semibold text-[#e8000d] border-[#e8000d]/30 hover:bg-red-50"
+          onClick={onSendInvoice}
+        >
+          Send Invoice by Email
         </Button>
         <Button
           variant="outline"
