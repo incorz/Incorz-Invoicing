@@ -68,19 +68,6 @@ export default function InvoiceForm({
 
   const subTotal = data.lineItems.reduce((sum, item) => sum + item.qty * item.rate, 0);
   const balance = subTotal - data.discount - data.paymentReceived;
-  const pkrRate = data.pkrExchangeRate || 0;
-
-  const buildPaymentTerms = (service: string) => {
-    const rateText = pkrRate > 0 ? ` (PKR ${(150 * pkrRate).toLocaleString()})` : "";
-    const templates: Record<string, string> = {
-      montana: `An advance payment of $150${rateText} is required to cover the State Filing Fee, Registered Agent Service, and Business Address.\n\nThe remaining balance of $84${pkrRate > 0 ? ` (PKR ${(84 * pkrRate).toLocaleString()})` : ""} will be payable once the EIN is obtained.`,
-      itin: `An upfront payment of $150${rateText} will be required to proceed with the ITIN application while the remaining $50${pkrRate > 0 ? ` (PKR ${(50 * pkrRate).toLocaleString()})` : ""} will be required after an ITIN is obtained.`,
-      uk: `An advance payment of £200${pkrRate > 0 ? ` (PKR ${(200 * pkrRate).toLocaleString()})` : ""} is required to cover the Ltd address fee and Companies House cost.\n\nThe remaining £80${pkrRate > 0 ? ` (PKR ${(80 * pkrRate).toLocaleString()})` : ""} will be due after the Ltd registration.`,
-      airwallex: `An advance payment of $60${rateText} is required to initiate the bank account setup process.\n\nThe remaining $60${pkrRate > 0 ? ` (PKR ${(60 * pkrRate).toLocaleString()})` : ""} will be due after the account is successfully approved.`,
-      airwallexFull: `A full upfront payment of $120${pkrRate > 0 ? ` (PKR ${(120 * pkrRate).toLocaleString()})` : ""} is required to initiate and complete the business bank account setup process.`,
-    };
-    updateField("paymentTerms", templates[service] || "");
-  };
 
   return (
     <div className="flex flex-col divide-y divide-border">
@@ -325,43 +312,12 @@ export default function InvoiceForm({
 
       {/* ── Payment Terms ── */}
       <div className="px-5 py-5 flex flex-col gap-4">
-        <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/60">Payment Terms</p>
-          <p className="text-[11px] text-muted-foreground mt-1">Choose a template, adjust the PKR rate, or write your own terms.</p>
-        </div>
-
-        <div className="grid grid-cols-[1fr_110px] gap-2">
-          <Select onValueChange={buildPaymentTerms}>
-            <SelectTrigger className="field-input h-9 px-4 text-xs">
-              <SelectValue placeholder="Use a payment terms template" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="montana">Montana LLC Formation</SelectItem>
-              <SelectItem value="itin">ITIN Application</SelectItem>
-              <SelectItem value="uk">UK Ltd Package</SelectItem>
-              <SelectItem value="airwallex">Airwallex Account Setup</SelectItem>
-              <SelectItem value="airwallexFull">Airwallex Business Bank (Full)</SelectItem>
-            </SelectContent>
-          </Select>
-          <div className="relative">
-            <Input
-              aria-label="PKR exchange rate"
-              type="text"
-              inputMode="decimal"
-              placeholder="PKR rate"
-              value={data.pkrExchangeRate || ""}
-              onChange={(e) => updateField("pkrExchangeRate", parseFloat(e.target.value) || 0)}
-              className="field-input h-9 pr-2 text-xs"
-            />
-          </div>
-        </div>
-        <p className="text-[10px] text-muted-foreground -mt-2">PKR per 1 USD/GBP</p>
-
+        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/60">Payment Terms</p>
         <Textarea
-          placeholder="Write custom payment terms or choose a template above."
+          placeholder="e.g. An advance payment of $225 has been received. The remaining balance will be due once the EIN is issued."
           value={data.paymentTerms}
           onChange={(e) => updateField("paymentTerms", e.target.value)}
-          rows={5}
+          rows={3}
           className="field-input resize-none text-xs rounded-2xl px-4 py-3"
         />
       </div>

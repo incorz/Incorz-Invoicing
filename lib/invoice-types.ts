@@ -21,7 +21,6 @@ export interface InvoiceData {
   discount: number;
   paymentReceived: number;
   paymentTerms: string;
-  pkrExchangeRate?: number;
   teamMember?: string;
   invoiceDescription?: string;
 }
@@ -58,7 +57,6 @@ export const DEFAULT_INVOICE: Omit<InvoiceData, "invoiceNumber"> = {
   discount: 0,
   paymentReceived: 0,
   paymentTerms: "",
-  pkrExchangeRate: 285,
 };
 
 export const CURRENCY_SYMBOLS: Record<Currency, string> = {
