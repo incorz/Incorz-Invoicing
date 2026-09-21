@@ -15,6 +15,7 @@ const getFirstName = (value: unknown) => {
     .replace(/\r/g, "")
     .split("\n")[0]
     .replace(/^(bill\s*to|client|customer)\s*[:*-]?\s*/i, "")
+    .replace(/^(mr|mrs|ms|miss|dr|prof)\.?\s+/i, "")
     .trim();
   const name = firstLine.split(/[\s,]+/).filter(Boolean)[0];
   return name || "there";

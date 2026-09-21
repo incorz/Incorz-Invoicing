@@ -38,6 +38,8 @@ export default function Home() {
   const [saveModalOpen, setSaveModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [emailStatus, setEmailStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
+  const [emailStatusMessage, setEmailStatusMessage] = useState("");
   const downloadingRef = useRef(false);
 
   const previewRef = useRef<HTMLDivElement>(null);
@@ -185,12 +187,19 @@ export default function Home() {
 
   const handleSendInvoice = useCallback(async () => {
     if (!invoiceData.clientEmail?.trim()) {
-      alert("Please enter the client's email address first.");
+      setEmailStatus("error");
+      setEmailStatusMessage("Please enter the client email address first.");
       return;
     }
     const preview = document.getElementById("invoice-preview");
-    if (!preview) return;
+    if (!preview) {
+      setEmailStatus("error");
+      setEmailStatusMessage("Invoice preview is not ready yet.");
+      return;
+    }
 
+    setEmailStatus("sending");
+    setEmailStatusMessage("Preparing your invoice PDF and sending the email...");
     try {
       const { toJpeg } = await import("html-to-image");
       const { jsPDF } = await import("jspdf");
@@ -215,9 +224,11 @@ export default function Home() {
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Unable to send invoice");
-      alert(`Invoice sent to ${invoiceData.clientEmail}.`);
+      setEmailStatus("success");
+      setEmailStatusMessage(`Invoice sent successfully to ${invoiceData.clientEmail}.`);
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Unable to send invoice");
+      setEmailStatus("error");
+      setEmailStatusMessage(error instanceof Error ? error.message : "Unable to send invoice");
     }
   }, [invoiceData]);
 
@@ -344,6 +355,33 @@ export default function Home() {
         </main>
 
       </div>
+
+      {emailStatus !== "idle" && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4" role="dialog" aria-modal="true" aria-labelledby="email-status-title">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-2xl border border-border">
+            {emailStatus === "sending" ? (
+              <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-red-100 border-t-[#e8000d]" aria-label="Sending email" />
+            ) : (
+              <div className={`mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-full text-lg font-bold text-white ${emailStatus === "success" ? "bg-emerald-500" : "bg-[#e8000d]"}`}>
+                {emailStatus === "success" ? "✓" : "!"}
+              </div>
+            )}
+            <h2 id="email-status-title" className="text-base font-semibold text-foreground">
+              {emailStatus === "sending" ? "Sending invoice" : emailStatus === "success" ? "Email sent" : "Email not sent"}
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">{emailStatusMessage}</p>
+            {emailStatus !== "sending" && (
+              <button
+                type="button"
+                onClick={() => setEmailStatus("idle")}
+                className="mt-5 h-10 w-full cursor-pointer rounded-full bg-[#e8000d] text-sm font-semibold text-white transition-opacity hover:opacity-90"
+              >
+                {emailStatus === "success" ? "Done" : "Close"}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Save Invoice Modal */}
       <SaveInvoiceModal
