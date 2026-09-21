@@ -45,10 +45,10 @@ export async function POST(request: Request) {
     }
 
     await transporter.sendMail({
-      from: process.env.SMTP_FROM,
+      from: `Buzz Filing <${process.env.SMTP_FROM}>`,
       to: recipient,
       replyTo: process.env.SMTP_USER,
-      subject: `Invoice #${invoice.invoiceNumber} from Buzz Filing`,
+      subject: `Your Buzz Filing Invoice #${invoice.invoiceNumber}`,
       text: `Hello ${firstName},\n\nThank you for choosing Buzz Filing.\n\nPlease find your invoice attached to this email for your records.\n\nIf you have any questions or need any assistance, please feel free to reply to this email.\n\nBest regards,\nBuzz Filing\nhello@buzzfiling.com\nbuzzfiling.com`,
       html: `<!doctype html><html><body style="margin:0;background:#f4f4f4;font-family:Arial,sans-serif;color:#202020"><div style="max-width:560px;margin:24px auto;background:#fff;border-top:5px solid #e8000d;padding:34px 28px 24px"><div style="text-align:center;margin-bottom:30px"><img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/images-SdNz6vfYoJoMVJMUFtXCjHac5xozpZ.png" alt="Buzz Filing" width="150" style="display:inline-block;max-width:150px;height:auto" /></div><p style="font-size:14px">Hello ${escapeHtml(firstName)},</p><p style="font-size:13px;line-height:1.7">Thank you for choosing <strong>Buzz Filing</strong>.</p><p style="font-size:13px;line-height:1.7">Please find your invoice attached to this email for your records.</p><p style="font-size:13px;line-height:1.7">If you have any questions or need any assistance, please feel free to reply to this email.</p><p style="font-size:13px;line-height:1.7;margin-top:26px">Best regards,<br/><strong>Buzz Filing</strong><br/><a href="mailto:hello@buzzfiling.com" style="color:#e8000d">hello@buzzfiling.com</a><br/><a href="https://buzzfiling.com" style="color:#e8000d">buzzfiling.com</a></p><p style="text-align:center;color:#999;font-size:11px;margin:30px 0 0">© 2026 Buzz Filing</p></div></body></html>`,
       attachments: [
