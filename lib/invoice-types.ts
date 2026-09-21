@@ -11,6 +11,7 @@ export interface LineItem {
 
 export interface InvoiceData {
   billTo: string;
+  clientEmail?: string;
   invoiceNumber: number;
   invoiceDate: string;
   serviceType: ServiceType;
