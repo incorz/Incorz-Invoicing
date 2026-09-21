@@ -188,12 +188,26 @@ export default function Home() {
       alert("Please enter the client's email address first.");
       return;
     }
+    const preview = document.getElementById("invoice-preview");
+    if (!preview) return;
 
     try {
+      const { toJpeg } = await import("html-to-image");
+      const { jsPDF } = await import("jspdf");
+      const image = await toJpeg(preview, {
+        quality: 1,
+        pixelRatio: 5,
+        backgroundColor: "#ffffff",
+        skipFonts: false,
+      });
+      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+      pdf.addImage(image, "JPEG", 0, 0, 210, 297, undefined, "FAST");
+      const pdfBase64 = pdf.output("datauristring").split(",")[1];
+
       const response = await fetch("/api/invoices/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(invoiceData),
+        body: JSON.stringify({ ...invoiceData, pdfBase64 }),
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Unable to send invoice");
