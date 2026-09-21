@@ -10,11 +10,11 @@ const escapeHtml = (value: unknown) =>
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
 
-const getFirstName = (billTo: string) => {
-  const firstLine = billTo
+const getFirstName = (value: unknown) => {
+  const firstLine = String(value ?? "")
     .replace(/\r/g, "")
     .split("\n")[0]
-    .replace(/^(bill\s*to|client|customer)\s*:\s*/i, "")
+    .replace(/^(bill\s*to|client|customer)\s*[:*-]?\s*/i, "")
     .trim();
   const name = firstLine.split(/[\s,]+/).filter(Boolean)[0];
   return name || "there";
@@ -22,7 +22,7 @@ const getFirstName = (billTo: string) => {
 
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as InvoiceData & { pdfBase64?: string };
+    const body = (await request.json()) as InvoiceData & { pdfBase64?: string; customerName?: string };
     const { pdfBase64, ...invoice } = body;
     const recipient = invoice.clientEmail?.trim();
 
@@ -44,7 +44,8 @@ export async function POST(request: Request) {
       auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASSWORD },
     });
 
-    const firstName = getFirstName(invoice.billTo);
+    const customerName = typeof body.customerName === "string" ? body.customerName : invoice.billTo;
+    const firstName = getFirstName(customerName);
     if (!pdfBase64 || !/^[A-Za-z0-9+/]+=*$/.test(pdfBase64)) {
       return NextResponse.json({ error: "Invoice PDF is required." }, { status: 400 });
     }

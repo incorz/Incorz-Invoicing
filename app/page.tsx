@@ -207,7 +207,11 @@ export default function Home() {
       const response = await fetch("/api/invoices/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...invoiceData, pdfBase64 }),
+        body: JSON.stringify({
+          ...invoiceData,
+          customerName: invoiceData.billTo.trim(),
+          pdfBase64,
+        }),
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Unable to send invoice");
