@@ -11,7 +11,12 @@ const escapeHtml = (value: unknown) =>
     .replaceAll("'", "&#039;");
 
 const getFirstName = (billTo: string) => {
-  const name = billTo.trim().replace(/[,].*$/, "").split(/\s+/)[0];
+  const firstLine = billTo
+    .replace(/\r/g, "")
+    .split("\n")[0]
+    .replace(/^(bill\s*to|client|customer)\s*:\s*/i, "")
+    .trim();
+  const name = firstLine.split(/[\s,]+/).filter(Boolean)[0];
   return name || "there";
 };
 
@@ -50,7 +55,7 @@ export async function POST(request: Request) {
       replyTo: process.env.SMTP_USER,
       subject: `Your Buzz Filing Invoice #${invoice.invoiceNumber}`,
       text: `Hello ${firstName},\n\nThank you for choosing Buzz Filing.\n\nPlease find your invoice attached to this email for your records.\n\nIf you have any questions or need any assistance, please feel free to reply to this email.\n\nBest regards,\nBuzz Filing\nhello@buzzfiling.com\nbuzzfiling.com`,
-      html: `<!doctype html><html><body style="margin:0;background:#f4f4f4;font-family:Arial,sans-serif;color:#202020"><div style="max-width:560px;margin:24px auto;background:#fff;border-top:5px solid #e8000d;padding:34px 28px 24px"><div style="text-align:center;margin-bottom:30px"><img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/images-SdNz6vfYoJoMVJMUFtXCjHac5xozpZ.png" alt="Buzz Filing" width="150" style="display:inline-block;max-width:150px;height:auto" /></div><p style="font-size:14px">Hello ${escapeHtml(firstName)},</p><p style="font-size:13px;line-height:1.7">Thank you for choosing <strong>Buzz Filing</strong>.</p><p style="font-size:13px;line-height:1.7">Please find your invoice attached to this email for your records.</p><p style="font-size:13px;line-height:1.7">If you have any questions or need any assistance, please feel free to reply to this email.</p><p style="font-size:13px;line-height:1.7;margin-top:26px">Best regards,<br/><strong>Buzz Filing</strong><br/><a href="mailto:hello@buzzfiling.com" style="color:#e8000d">hello@buzzfiling.com</a><br/><a href="https://buzzfiling.com" style="color:#e8000d">buzzfiling.com</a></p><p style="text-align:center;color:#999;font-size:11px;margin:30px 0 0">© 2026 Buzz Filing</p></div></body></html>`,
+      html: `<!doctype html><html><body style="margin:0;background:#ffffff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;color:#222"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff"><tr><td align="center" style="padding:40px 20px"><table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border:1px solid #eeeeee;border-radius:8px"><tr><td align="center" style="padding:40px 40px 30px"><img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/images-SdNz6vfYoJoMVJMUFtXCjHac5xozpZ.png" alt="Buzz Filing" width="180" style="display:block;width:180px;height:auto" /></td></tr><tr><td style="padding:0 40px 40px"><p style="margin:0 0 20px;font-size:16px;color:#000">Hello ${escapeHtml(firstName)},</p><p style="margin:0 0 20px;font-size:14px;color:#333;line-height:1.6">Thank you for choosing Buzz Filing.</p><p style="margin:0 0 20px;font-size:14px;color:#333;line-height:1.6">Please find your invoice attached to this email for your records.</p><p style="margin:0 0 20px;font-size:14px;color:#333;line-height:1.6">If you have any questions or need any assistance, please feel free to reply to this email.</p><p style="margin:0;font-size:14px;color:#333;line-height:1.6">Best regards,<br/><strong>Buzz Filing</strong><br/><a href="mailto:hello@buzzfiling.com" style="color:#880000">hello@buzzfiling.com</a><br/><a href="https://buzzfiling.com" style="color:#880000">buzzfiling.com</a></p></td></tr><tr><td align="center" style="padding:0 40px 40px;border-top:1px solid #eeeeee"><p style="margin:30px 0 0;font-size:12px;color:#999">All rights reserved © 2026 | <span style="color:#880000;font-weight:600">Buzz Filing</span></p><p style="margin:8px 0 0;font-size:12px;color:#999">...</p></td></tr></table></td></tr></table></body></html>`,
       attachments: [
         {
           filename: `Invoice-${invoice.invoiceNumber}.pdf`,
