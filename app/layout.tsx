@@ -11,8 +11,7 @@ const _unbounded = Unbounded({
 
 export const metadata: Metadata = {
   title: 'Buzz Filing — Invoice Generator',
-  description: 'Professional invoice generator for Buzz Filing — LLC Formation, ITIN, and business fi
-  ling services.',
+  description: 'Professional invoice generator for Buzz Filing — LLC Formation, ITIN, and business filing services.',
   generator: 'v0.app',
   icons: {
     icon: '/favicon.png',
