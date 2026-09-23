@@ -259,6 +259,7 @@ export default function Home() {
     // Check if there's an invoice to edit from history
     if (typeof window !== "undefined" && mounted) {
       const editInvoice = sessionStorage.getItem("editInvoice");
+      const duplicateInvoice = sessionStorage.getItem("duplicateInvoice");
       if (editInvoice) {
         try {
           const invoice = JSON.parse(editInvoice) as InvoiceData & { _id: string };
@@ -267,6 +268,17 @@ export default function Home() {
           sessionStorage.removeItem("editInvoice");
         } catch (error) {
           console.error("[v0] Failed to parse edit invoice:", error);
+        }
+      } else if (duplicateInvoice) {
+        try {
+          const copy = JSON.parse(duplicateInvoice) as Omit<InvoiceData, "invoiceNumber">;
+          fetch("/api/invoice-number")
+            .then((response) => response.json())
+            .then(({ invoiceNumber }) => setInvoiceData({ ...copy, invoiceNumber: typeof invoiceNumber === "number" ? invoiceNumber : 2100 }));
+          setIsEditMode(false);
+          sessionStorage.removeItem("duplicateInvoice");
+        } catch (error) {
+          console.error("[v0] Failed to parse duplicate invoice:", error);
         }
       }
     }

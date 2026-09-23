@@ -1,6 +1,8 @@
 import nodemailer from "nodemailer";
 import { NextResponse } from "next/server";
 import type { InvoiceData } from "@/lib/invoice-types";
+import { getDb } from "@/lib/mongodb";
+import { ObjectId } from "mongodb";
 
 const escapeHtml = (value: unknown) =>
   String(value ?? "")
@@ -23,7 +25,7 @@ const getFirstName = (value: unknown) => {
 
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as InvoiceData & { pdfBase64?: string; customerName?: string };
+    const body = (await request.json()) as InvoiceData & { _id?: string; pdfBase64?: string; customerName?: string };
     const { pdfBase64, ...invoice } = body;
     const recipient = invoice.clientEmail?.trim();
 
@@ -67,6 +69,14 @@ export async function POST(request: Request) {
         },
       ],
     });
+
+    if (invoice._id) {
+      const db = await getDb();
+      await db.collection("invoices").updateOne(
+        { _id: new ObjectId(invoice._id) },
+        { $push: { activity: { type: "sent", at: new Date().toISOString() } as any }, $set: { updatedAt: new Date() } } as any,
+      );
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
