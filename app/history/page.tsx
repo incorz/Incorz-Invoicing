@@ -97,6 +97,19 @@ export default function HistoryPage() {
     }
   };
 
+  const handleActivityOpen = async (invoice: StoredInvoice) => {
+    setActivityInvoice(invoice);
+    try {
+      await fetch("/api/invoices/list", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: invoice._id }),
+      });
+    } catch (error) {
+      console.error("[v0] Failed to record opened activity:", error);
+    }
+  };
+
   const calculateTotal = (invoice: StoredInvoice) => {
     const subtotal = invoice.lineItems.reduce((sum, item) => sum + item.qty * item.rate, 0);
     return subtotal - invoice.discount + invoice.paymentReceived;
@@ -217,7 +230,7 @@ export default function HistoryPage() {
 
                         <button
                           type="button"
-                          onClick={() => setActivityInvoice(invoice)}
+                          onClick={() => handleActivityOpen(invoice)}
                           className="flex w-full items-center gap-2 border-t border-border pt-2 text-left text-xs text-muted-foreground transition-colors hover:text-foreground"
                         >
                           <History className="h-3.5 w-3.5" />
