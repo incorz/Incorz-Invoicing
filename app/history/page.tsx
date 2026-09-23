@@ -15,6 +15,13 @@ import {
 import { InvoiceData, CURRENCY_SYMBOLS } from "@/lib/invoice-types";
 import Link from "next/link";
 import { Trash2, Edit2, Copy, ArrowLeft, Search, History } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface StoredInvoice extends InvoiceData {
   _id: string;
@@ -30,6 +37,7 @@ export default function HistoryPage() {
   const [editId, setEditId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [previewId, setPreviewId] = useState<string | null>(null);
+  const [activityInvoice, setActivityInvoice] = useState<StoredInvoice | null>(null);
 
   useEffect(() => {
     fetchInvoices();
@@ -207,20 +215,17 @@ export default function HistoryPage() {
                           </div>
                         )}
 
-                        <details className="border-t border-border pt-2 text-xs">
-                          <summary className="flex cursor-pointer items-center gap-2 text-muted-foreground">
-                            <History className="h-3.5 w-3.5" /> Activity history
-                          </summary>
-                          <div className="mt-2 space-y-1.5">
-                            {(invoice.activity || []).slice().reverse().map((event, index) => (
-                              <div key={`${event.type}-${event.at}-${index}`} className="flex justify-between gap-2 text-muted-foreground">
-                                <span className="capitalize">{event.type}</span>
-                                <time dateTime={event.at}>{new Date(event.at).toLocaleString()}</time>
-                              </div>
-                            ))}
-                            {!invoice.activity?.length && <p className="text-muted-foreground">No activity recorded yet.</p>}
-                          </div>
-                        </details>
+                        <button
+                          type="button"
+                          onClick={() => setActivityInvoice(invoice)}
+                          className="flex w-full items-center gap-2 border-t border-border pt-2 text-left text-xs text-muted-foreground transition-colors hover:text-foreground"
+                        >
+                          <History className="h-3.5 w-3.5" />
+                          <span>Activity history</span>
+                          <span className="ml-auto rounded-full bg-muted px-2 py-0.5 text-[10px]">
+                            {invoice.activity?.length || 0}
+                          </span>
+                        </button>
 
                         <div className="flex items-center justify-between pt-2 border-t border-border">
                           <div>
@@ -290,6 +295,57 @@ export default function HistoryPage() {
           </div>
         )}
       </main>
+
+      <Dialog open={!!activityInvoice} onOpenChange={(open) => !open && setActivityInvoice(null)}>
+        <DialogContent className="max-h-[85vh] overflow-hidden p-0 sm:max-w-lg">
+          <DialogHeader className="border-b border-border px-5 py-4 pr-12 sm:px-6">
+            <DialogTitle>
+              Invoice #{activityInvoice?.invoiceNumber} activity
+            </DialogTitle>
+            <DialogDescription className="truncate">
+              {activityInvoice?.billTo || "Invoice activity timeline"}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="max-h-[calc(85vh-125px)] overflow-y-auto px-5 py-5 sm:px-6">
+            <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
+              <div className="rounded-lg border border-border p-3">
+                <p className="text-xs text-muted-foreground">Events</p>
+                <p className="mt-1 text-lg font-semibold">{activityInvoice?.activity?.length || 0}</p>
+              </div>
+              <div className="rounded-lg border border-border p-3">
+                <p className="text-xs text-muted-foreground">Status</p>
+                <p className="mt-1 truncate text-sm font-semibold">{activityInvoice?.paymentStatus || "—"}</p>
+              </div>
+              <div className="col-span-2 rounded-lg border border-border p-3 sm:col-span-1">
+                <p className="text-xs text-muted-foreground">Last activity</p>
+                <p className="mt-1 text-sm font-semibold">
+                  {activityInvoice?.activity?.length
+                    ? new Date(activityInvoice.activity[activityInvoice.activity.length - 1].at).toLocaleDateString()
+                    : "—"}
+                </p>
+              </div>
+            </div>
+            <div className="relative space-y-4 pl-1">
+              {(activityInvoice?.activity || []).slice().reverse().map((event, index) => (
+                <div key={`${event.type}-${event.at}-${index}`} className="relative flex gap-3">
+                  <div className="relative z-10 mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-[#e8000d] ring-4 ring-white" />
+                  <div className="min-w-0 flex-1 border-b border-border pb-4 last:border-0">
+                    <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                      <p className="text-sm font-medium capitalize">{event.type}</p>
+                      <time dateTime={event.at} className="text-xs text-muted-foreground">
+                        {new Date(event.at).toLocaleString()}
+                      </time>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {!activityInvoice?.activity?.length && (
+                <p className="py-8 text-center text-sm text-muted-foreground">No activity recorded yet.</p>
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
