@@ -170,6 +170,32 @@ export default function Home() {
     handleReset();
   }, [handleReset]);
 
+  const handleVoiceCommand = useCallback((transcript: string) => {
+    const command = transcript.trim();
+    const normalized = command.toLowerCase();
+    const serviceMatchers = [
+      { pattern: /itin/, service: "ITIN Application" },
+      { pattern: /airwallex/, service: "Airwallex Account Setup" },
+      { pattern: /uk\s*(?:ltd|limited)|united kingdom/, service: "UK Ltd Formation" },
+      { pattern: /llc|limited liability/, service: "LLC Formation" },
+    ];
+    const matchedService = serviceMatchers.find(({ pattern }) => pattern.test(normalized))?.service;
+    const forMatch = command.match(/\bfor\s+(.+?)(?=\s+for\s+|\s+(?:service|services?)\b|$)/i);
+    const nameMatch = forMatch?.[1]?.trim();
+    const clientName = nameMatch?.replace(/^(?:a|an|the)\s+/i, "").trim();
+
+    setInvoiceData((previous) => ({
+      ...previous,
+      ...(clientName ? { billTo: clientName } : {}),
+      ...(matchedService ? {
+        serviceType: matchedService,
+        lineItems: previous.lineItems.map((item, index) =>
+          index === 0 && !item.description ? { ...item, description: matchedService } : item,
+        ),
+      } : {}),
+    }));
+  }, []);
+
   const handleSave = useCallback(() => {
     setSaveModalOpen(true);
   }, []);
@@ -328,6 +354,7 @@ export default function Home() {
             onReset={handleReset}
             onSave={handleSave}
             onSendInvoice={handleSendInvoice}
+            onVoiceCommand={handleVoiceCommand}
             invoiceNumLoading={invoiceNumLoading}
             isEditMode={isEditMode}
             onCreateNew={handleCreateNew}
