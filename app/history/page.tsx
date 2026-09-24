@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { InvoiceData, CURRENCY_SYMBOLS } from "@/lib/invoice-types";
 import Link from "next/link";
-import { Trash2, Edit2, Copy, ArrowLeft, Search } from "lucide-react";
+import { Trash2, Edit2, Copy, ArrowLeft, Search, History } from "lucide-react";
 
 interface StoredInvoice extends InvoiceData {
   _id: string;
@@ -83,7 +83,7 @@ export default function HistoryPage() {
 
   const handleDuplicate = (invoice: StoredInvoice) => {
     if (typeof window !== "undefined") {
-      const { _id, invoiceNumber, createdAt, updatedAt, ...copy } = invoice;
+      const { _id, invoiceNumber, activity, createdAt, updatedAt, ...copy } = invoice;
       sessionStorage.setItem("duplicateInvoice", JSON.stringify(copy));
       router.push("/");
     }
@@ -206,6 +206,21 @@ export default function HistoryPage() {
                             <p className="text-sm font-medium">{invoice.teamMember}</p>
                           </div>
                         )}
+
+                        <details className="border-t border-border pt-2 text-xs">
+                          <summary className="flex cursor-pointer items-center gap-2 text-muted-foreground">
+                            <History className="h-3.5 w-3.5" /> Activity history
+                          </summary>
+                          <div className="mt-2 space-y-1.5">
+                            {(invoice.activity || []).slice().reverse().map((event, index) => (
+                              <div key={`${event.type}-${event.at}-${index}`} className="flex justify-between gap-2 text-muted-foreground">
+                                <span className="capitalize">{event.type}</span>
+                                <time dateTime={event.at}>{new Date(event.at).toLocaleString()}</time>
+                              </div>
+                            ))}
+                            {!invoice.activity?.length && <p className="text-muted-foreground">No activity recorded yet.</p>}
+                          </div>
+                        </details>
 
                         <div className="flex items-center justify-between pt-2 border-t border-border">
                           <div>

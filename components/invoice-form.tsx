@@ -2,7 +2,6 @@
 
 import { Dispatch, SetStateAction } from "react";
 import { PlusCircle, Trash2 } from "lucide-react";
-import VoiceInvoiceControl from "@/components/voice-invoice-control";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,7 +22,6 @@ interface InvoiceFormProps {
   onReset: () => void;
   onSave: () => void;
   onSendInvoice: () => void;
-  onVoiceCommand: (transcript: string) => void;
   invoiceNumLoading?: boolean;
   isEditMode?: boolean;
   onCreateNew?: () => void;
@@ -36,7 +34,6 @@ export default function InvoiceForm({
   onReset,
   onSave,
   onSendInvoice,
-  onVoiceCommand,
   invoiceNumLoading = false,
   isEditMode = false,
   onCreateNew,
@@ -80,11 +77,10 @@ export default function InvoiceForm({
       {/* ── Title ── */}
       <div className="px-5 py-5 flex items-center gap-3">
         <span className="w-0.5 h-5 rounded-full" style={{ background: "linear-gradient(135deg, #ff0d13 0%, #ff6b00 100%)" }} />
-        <div className="min-w-0">
+        <div>
           <h2 className="text-sm font-bold" style={{ color: "#0d0f1a" }}>Invoice Details</h2>
           <p className="text-[11px] mt-0.5" style={{ color: "#6b7280" }}>Preview updates live as you type</p>
         </div>
-        <VoiceInvoiceControl onCommand={onVoiceCommand} />
       </div>
 
       {/* ── Client Info ── */}

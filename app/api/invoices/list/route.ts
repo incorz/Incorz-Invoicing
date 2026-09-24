@@ -1,4 +1,5 @@
 import { getDb } from "@/lib/mongodb";
+
 export const runtime = "nodejs";
 // Don't cache list to ensure deleted invoices are immediately removed
 export const revalidate = 0;
@@ -13,6 +14,18 @@ export async function GET(req: Request) {
       .sort({ createdAt: -1 })
       .limit(100)
       .toArray();
+
+    // Viewing history records an opened event for each listed invoice.
+    if (docs.length) {
+      const openedAt = new Date().toISOString();
+      await invoices.updateMany(
+        { _id: { $in: docs.map((doc) => doc._id) } },
+        { $push: { activity: { type: "opened", at: openedAt } as any } } as any,
+      );
+      docs.forEach((doc: any) => {
+        doc.activity = [...(doc.activity || []), { type: "opened", at: openedAt }];
+      });
+    }
 
     // Convert ObjectId to string for JSON serialization
     const invoiceList = docs.map((doc: any) => ({
