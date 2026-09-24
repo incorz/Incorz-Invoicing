@@ -60,9 +60,10 @@ const labelStyle: CSSProperties = {
 // ─── Component ────────────────────────────────────────────────────────────────
 interface InvoicePreviewProps {
   data: InvoiceData;
+  qrCode?: string;
 }
 
-const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }, ref) => {
+const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data, qrCode }, ref) => {
   // ── Derived values
   const subTotal = data.lineItems.reduce((sum, item) => sum + item.qty * item.rate, 0);
   const balance  = subTotal - data.discount - data.paymentReceived;
@@ -386,8 +387,18 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
         <span style={{ fontSize: "18px", fontWeight: "900", color: BRAND }}>business!</span>
       </div>
 
-      {/* ── PAYMENT TERMS ─────────────────────────────────────────────────── */}
-      <div style={{ padding: `0 ${PAD}px 20px` }}>
+  {qrCode && (
+    <div style={{ padding: `0 ${PAD}px 18px`, display: "flex", alignItems: "center", gap: "12px" }}>
+      <img src={qrCode} alt="Scan to view invoice" style={{ width: "72px", height: "72px" }} />
+      <div style={{ fontSize: "8px", color: C.black, lineHeight: 1.6 }}>
+        <strong style={{ display: "block", fontSize: "9px" }}>Scan to view invoice</strong>
+        Scan this QR code to open the invoice details.
+      </div>
+    </div>
+  )}
+
+  {/* ── PAYMENT TERMS ─────────────────────────────────────────────────── */}
+  <div style={{ padding: `0 ${PAD}px 20px` }}>
         <div style={labelStyle}>PAYMENT TERMS</div>
         <div style={{ fontSize: "9px", color: C.black, lineHeight: "1.8" }}>
           {data.paymentTerms || "—"}
