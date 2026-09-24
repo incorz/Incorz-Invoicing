@@ -6,6 +6,7 @@ import InvoicePreview from "@/components/invoice-preview";
 import PasscodeGate from "@/components/passcode-gate";
 import { SaveInvoiceModal } from "@/components/save-invoice-modal";
 import { InvoiceData, DEFAULT_INVOICE } from "@/lib/invoice-types";
+import QRCode from "qrcode";
 
 const FORM_DATA_KEY = "buzz_filing_form_data";
 
@@ -40,6 +41,7 @@ export default function Home() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [emailStatus, setEmailStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
   const [emailStatusMessage, setEmailStatusMessage] = useState("");
+  const [qrCode, setQrCode] = useState("");
   const downloadingRef = useRef(false);
 
   const previewRef = useRef<HTMLDivElement>(null);
@@ -71,6 +73,16 @@ export default function Home() {
     if (mounted) {
       saveFormData(invoiceData);
     }
+    const qrPayload = [
+      `Buzz Filing Invoice #${invoiceData.invoiceNumber}`,
+      `Client: ${invoiceData.billTo || "—"}`,
+      `Service: ${invoiceData.serviceType || "—"}`,
+      `Total: ${invoiceData.currency} ${invoiceData.lineItems.reduce((sum, item) => sum + item.qty * item.rate, 0) - invoiceData.discount}`,
+      "Please contact Buzz Filing for the complete invoice PDF.",
+    ].join("\\n");
+    QRCode.toDataURL(qrPayload, { width: 240, margin: 1, color: { dark: "#000000", light: "#ffffff" } })
+      .then(setQrCode)
+      .catch(() => setQrCode(""));
   }, [invoiceData, mounted]);
 
   const handleDownload = useCallback(async () => {
@@ -173,6 +185,16 @@ export default function Home() {
   const handleSave = useCallback(() => {
     setSaveModalOpen(true);
   }, []);
+
+  const handleShareWhatsApp = useCallback(async () => {
+    if (!invoiceData.billTo.trim()) {
+      alert("Please enter a client name before sharing.");
+      return;
+    }
+    await handleDownload();
+    const message = `Hello ${invoiceData.billTo.trim()},%0A%0AYour Buzz Filing invoice #${invoiceData.invoiceNumber} is ready. The invoice PDF has been downloaded and is ready to attach here.%0A%0AThank you for choosing Buzz Filing.`;
+    window.open(`https://wa.me/?text=${message}`, "_blank", "noopener,noreferrer");
+  }, [handleDownload, invoiceData]);
 
   const handleSendInvoice = useCallback(async () => {
     if (!invoiceData.clientEmail?.trim()) {
@@ -328,6 +350,7 @@ export default function Home() {
             onReset={handleReset}
             onSave={handleSave}
             onSendInvoice={handleSendInvoice}
+            onShareWhatsApp={handleShareWhatsApp}
             invoiceNumLoading={invoiceNumLoading}
             isEditMode={isEditMode}
             onCreateNew={handleCreateNew}
@@ -350,7 +373,7 @@ export default function Home() {
           {/* Horizontally scrollable on small screens, centered on large */}
           <div className="overflow-x-auto pb-4">
             <div className="mx-auto" style={{ width: "794px" }}>
-              <InvoicePreview ref={previewRef} data={invoiceData} />
+              <InvoicePreview ref={previewRef} data={invoiceData} qrCode={qrCode} />
             </div>
           </div>
         </main>

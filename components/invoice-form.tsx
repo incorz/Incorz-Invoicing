@@ -22,6 +22,7 @@ interface InvoiceFormProps {
   onReset: () => void;
   onSave: () => void;
   onSendInvoice: () => void;
+  onShareWhatsApp: () => void;
   invoiceNumLoading?: boolean;
   isEditMode?: boolean;
   onCreateNew?: () => void;
@@ -34,6 +35,7 @@ export default function InvoiceForm({
   onReset,
   onSave,
   onSendInvoice,
+  onShareWhatsApp,
   invoiceNumLoading = false,
   isEditMode = false,
   onCreateNew,
@@ -351,10 +353,17 @@ export default function InvoiceForm({
           variant="outline"
           className="w-full h-9 rounded-full cursor-pointer text-xs font-semibold text-[#e8000d] border-[#e8000d]/30 hover:bg-red-50"
           onClick={onSendInvoice}
-        >
-          Send Invoice by Email
-        </Button>
-        <Button
+  >
+  Send Invoice by Email
+  </Button>
+  <Button
+    variant="outline"
+    className="w-full h-9 rounded-full cursor-pointer text-xs font-semibold text-[#128c7e] border-[#128c7e]/30 hover:bg-emerald-50"
+    onClick={onShareWhatsApp}
+  >
+    Share Invoice on WhatsApp
+  </Button>
+  <Button
           variant="outline"
           className="w-full h-9 rounded-full cursor-pointer text-xs text-muted-foreground border-border hover:bg-secondary"
           onClick={onReset}
