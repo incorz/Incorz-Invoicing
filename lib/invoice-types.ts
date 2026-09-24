@@ -2,13 +2,6 @@ export type PaymentStatus = "Paid" | "Partial Paid" | "Unpaid";
 export type Currency = "USD" | "GBP";
 export type ServiceType = string;
 
-export type InvoiceActivityType = "created" | "edited" | "sent" | "opened" | "paid";
-
-export interface InvoiceActivity {
-  type: InvoiceActivityType;
-  at: string;
-}
-
 export interface LineItem {
   id: string;
   description: string;
@@ -31,7 +24,6 @@ export interface InvoiceData {
   paymentTerms: string;
   teamMember?: string;
   invoiceDescription?: string;
-  activity?: InvoiceActivity[];
 }
 
 export const COMPANY_INFO = {

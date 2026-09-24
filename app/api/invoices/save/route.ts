@@ -11,20 +11,13 @@ export async function POST(req: Request) {
     const invoices = db.collection("invoices");
 
     if (body._id) {
-      // Update existing invoice - exclude _id and append lifecycle activity
-      const { _id, activity: _ignoredActivity, ...updateData } = body;
-      const existing = await invoices.findOne({ _id: new ObjectId(_id) });
-      const now = new Date().toISOString();
-      const activities = [{ type: "edited", at: now }];
-      if (existing?.paymentStatus !== "Paid" && body.paymentStatus === "Paid") {
-        activities.push({ type: "paid", at: now });
-      }
+      // Update existing invoice - exclude _id from the update
+      const { _id, ...updateData } = body;
       const result = await invoices.updateOne(
         { _id: new ObjectId(_id) },
         {
           $set: {
             ...updateData,
-            activity: [...(existing?.activity || []), ...activities],
             updatedAt: new Date(),
           },
         }
@@ -45,7 +38,6 @@ export async function POST(req: Request) {
         ...invoiceData,
         createdAt: new Date(),
         updatedAt: new Date(),
-        activity: [{ type: "created", at: new Date().toISOString() }],
       });
       return Response.json({ success: true, _id: result.insertedId });
     }
