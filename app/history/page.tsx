@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { InvoiceData, CURRENCY_SYMBOLS } from "@/lib/invoice-types";
 import Link from "next/link";
-import { Trash2, Edit2, ArrowLeft, Search } from "lucide-react";
+import { Trash2, Edit2, Copy, ArrowLeft, Search, History } from "lucide-react";
 
 interface StoredInvoice extends InvoiceData {
   _id: string;
@@ -77,6 +77,14 @@ export default function HistoryPage() {
   const handleEdit = (invoice: StoredInvoice) => {
     if (typeof window !== "undefined") {
       sessionStorage.setItem("editInvoice", JSON.stringify(invoice));
+      router.push("/");
+    }
+  };
+
+  const handleDuplicate = (invoice: StoredInvoice) => {
+    if (typeof window !== "undefined") {
+      const { _id, invoiceNumber, activity, createdAt, updatedAt, ...copy } = invoice;
+      sessionStorage.setItem("duplicateInvoice", JSON.stringify(copy));
       router.push("/");
     }
   };
@@ -199,6 +207,21 @@ export default function HistoryPage() {
                           </div>
                         )}
 
+                        <details className="border-t border-border pt-2 text-xs">
+                          <summary className="flex cursor-pointer items-center gap-2 text-muted-foreground">
+                            <History className="h-3.5 w-3.5" /> Activity history
+                          </summary>
+                          <div className="mt-2 space-y-1.5">
+                            {(invoice.activity || []).slice().reverse().map((event, index) => (
+                              <div key={`${event.type}-${event.at}-${index}`} className="flex justify-between gap-2 text-muted-foreground">
+                                <span className="capitalize">{event.type}</span>
+                                <time dateTime={event.at}>{new Date(event.at).toLocaleString()}</time>
+                              </div>
+                            ))}
+                            {!invoice.activity?.length && <p className="text-muted-foreground">No activity recorded yet.</p>}
+                          </div>
+                        </details>
+
                         <div className="flex items-center justify-between pt-2 border-t border-border">
                           <div>
                             <p className="text-xs text-muted-foreground">Total</p>
@@ -218,15 +241,24 @@ export default function HistoryPage() {
 
                       {/* Card Footer - Actions */}
                       <div className="px-4 py-3 bg-gray-50 border-t border-border flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEdit(invoice)}
-                          className="flex-1 gap-2 cursor-pointer"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                          Edit
-                        </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEdit(invoice)}
+                            className="flex-1 gap-2 cursor-pointer"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                            Edit
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDuplicate(invoice)}
+                            className="gap-2 cursor-pointer"
+                            title="Duplicate invoice"
+                          >
+                            <Copy className="w-4 h-4" />
+                          </Button>
                         <Button
                           variant="destructive"
                           size="sm"
