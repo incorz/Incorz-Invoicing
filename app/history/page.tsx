@@ -14,7 +14,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { InvoiceData, CURRENCY_SYMBOLS } from "@/lib/invoice-types";
 import Link from "next/link";
-import { Trash2, Edit2, Copy, ArrowLeft, Search } from "lucide-react";
+import { Trash2, Edit2, Copy, ArrowLeft, Search, Share2, Download } from "lucide-react";
+import QRCode from "qrcode";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface StoredInvoice extends InvoiceData {
   _id: string;
@@ -30,6 +32,8 @@ export default function HistoryPage() {
   const [editId, setEditId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [previewId, setPreviewId] = useState<string | null>(null);
+  const [shareState, setShareState] = useState<{ invoice: StoredInvoice; url: string; qr: string } | null>(null);
+  const [sharingId, setSharingId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchInvoices();
@@ -86,6 +90,26 @@ export default function HistoryPage() {
       const { _id, invoiceNumber, createdAt, updatedAt, ...copy } = invoice;
       sessionStorage.setItem("duplicateInvoice", JSON.stringify(copy));
       router.push("/");
+    }
+  };
+
+  const handleCreateShare = async (invoice: StoredInvoice) => {
+    setSharingId(invoice._id);
+    try {
+      const response = await fetch("/api/invoices/share", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ invoiceId: invoice._id }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Unable to create link");
+      const url = `${window.location.origin}/invoice/${result.token}`;
+      const qr = await QRCode.toDataURL(url, { width: 360, margin: 1, color: { dark: "#0d0f1a", light: "#ffffff" } });
+      setShareState({ invoice, url, qr });
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Unable to create secure link");
+    } finally {
+      setSharingId(null);
     }
   };
 
@@ -244,9 +268,20 @@ export default function HistoryPage() {
                           >
                             <Copy className="w-4 h-4" />
                           </Button>
-                        <Button
-                          variant="destructive"
-                          size="sm"
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleCreateShare(invoice)}
+                            disabled={sharingId === invoice._id}
+                            className="gap-2 cursor-pointer"
+                            title="Create secure public link"
+                          >
+                            {sharingId === invoice._id ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#e8000d] border-t-transparent" /> : <Share2 className="w-4 h-4" />}
+                            <span className="sr-only">Share invoice</span>
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
                           onClick={() => setDeleteId(invoice._id)}
                           className="flex-1 gap-2 cursor-pointer"
                         >
@@ -275,6 +310,21 @@ export default function HistoryPage() {
           </div>
         )}
       </main>
+
+      <Dialog open={!!shareState} onOpenChange={(open) => !open && setShareState(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Secure invoice link</DialogTitle>
+            <DialogDescription>Share this private link or QR code with {shareState?.invoice.billTo}.</DialogDescription>
+          </DialogHeader>
+          {shareState && <div className="space-y-5">
+            <div className="flex justify-center rounded-xl border border-[#e5e7eb] bg-white p-4"><img src={shareState.qr} alt="QR code for secure invoice link" className="h-52 w-52" /></div>
+            <div className="flex gap-2"><input readOnly value={shareState.url} className="min-w-0 flex-1 rounded-lg border border-[#e5e7eb] px-3 py-2 text-xs" /><Button type="button" onClick={() => navigator.clipboard.writeText(shareState.url)} className="shrink-0 bg-[#e8000d] hover:bg-[#b00009]">Copy</Button></div>
+            <a href={shareState.url} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 rounded-lg border border-[#e8000d] px-4 py-2 text-sm font-semibold text-[#e8000d]"><Download className="h-4 w-4" /> Open public invoice</a>
+            <p className="text-center text-xs text-[#667085]">Anyone with this unguessable link can view this invoice. Create a new link to revoke the previous one.</p>
+          </div>}
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
