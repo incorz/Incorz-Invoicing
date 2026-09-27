@@ -240,7 +240,7 @@ export default function HistoryPage() {
               <Search className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="Search by invoice number, client, or team member..."
+                placeholder="Search by invoice number, client, service, or team member..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
@@ -256,6 +256,8 @@ export default function HistoryPage() {
                     invoice.invoiceNumber.toString().includes(query) ||
                     invoice.billTo.toLowerCase().includes(query) ||
                     invoice.teamMember?.toLowerCase().includes(query) ||
+                    invoice.serviceType?.toLowerCase().includes(query) ||
+                    invoice.lineItems?.some((item) => item.description?.toLowerCase().includes(query)) ||
                     invoice.invoiceDescription?.toLowerCase().includes(query)
                   );
                 })
