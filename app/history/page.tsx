@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,6 +17,7 @@ import Link from "next/link";
 import { Trash2, Edit2, Copy, ArrowLeft, Search, Share2, Download, FileDown } from "lucide-react";
 import QRCode from "qrcode";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import InvoicePreview from "@/components/invoice-preview";
 
 interface StoredInvoice extends InvoiceData {
   _id: string;
@@ -34,6 +35,8 @@ export default function HistoryPage() {
   const [previewId, setPreviewId] = useState<string | null>(null);
   const [shareState, setShareState] = useState<{ invoice: StoredInvoice; url: string; qr: string } | null>(null);
   const [sharingId, setSharingId] = useState<string | null>(null);
+  const [downloadInvoice, setDownloadInvoice] = useState<StoredInvoice | null>(null);
+  const downloadPreviewRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchInvoices();
@@ -93,80 +96,38 @@ export default function HistoryPage() {
     }
   };
 
-  const handleDownload = async (invoice: StoredInvoice) => {
-    try {
-      const { jsPDF } = await import("jspdf");
-      const pdf = new jsPDF({ unit: "mm", format: "a4" });
-      const symbol = CURRENCY_SYMBOLS[invoice.currency] || invoice.currency;
-      const subtotal = invoice.lineItems.reduce((sum, item) => sum + item.qty * item.rate, 0);
-      const total = subtotal - invoice.discount;
-      let y = 24;
-
-      pdf.setTextColor("#0d0f1a");
-      pdf.setFontSize(22);
-      pdf.setFont("helvetica", "bold");
-      pdf.text("Buzz Filing", 20, y);
-      pdf.setDrawColor("#e8000d");
-      pdf.setLineWidth(1.2);
-      pdf.line(20, y + 7, 190, y + 7);
-      y += 22;
-
-      pdf.setFontSize(18);
-      pdf.text(`Invoice #${invoice.invoiceNumber}`, 20, y);
-      pdf.setFont("helvetica", "normal");
-      pdf.setFontSize(10);
-      pdf.text(`Date: ${new Date(invoice.invoiceDate).toLocaleDateString()}`, 190, y, { align: "right" });
-      y += 12;
-      pdf.setTextColor("#667085");
-      pdf.text("BILL TO", 20, y);
-      pdf.setTextColor("#222222");
-      pdf.setFont("helvetica", "bold");
-      pdf.text(invoice.billTo || "—", 20, y + 6);
-      if (invoice.clientEmail) {
-        pdf.setFont("helvetica", "normal");
-        pdf.text(invoice.clientEmail, 20, y + 12);
-      }
-      y += 30;
-
-      pdf.setFillColor("#f8fafc");
-      pdf.rect(20, y - 6, 170, 10, "F");
-      pdf.setTextColor("#667085");
-      pdf.setFont("helvetica", "bold");
-      pdf.text("SERVICE", 24, y);
-      pdf.text("QTY", 125, y);
-      pdf.text("RATE", 145, y);
-      pdf.text("AMOUNT", 190, y, { align: "right" });
-      y += 12;
-      pdf.setTextColor("#222222");
-      pdf.setFont("helvetica", "normal");
-      invoice.lineItems.forEach((item) => {
-        const amount = item.qty * item.rate;
-        pdf.text(item.description || invoice.serviceType || "Service", 24, y);
-        pdf.text(String(item.qty), 125, y);
-        pdf.text(`${symbol}${item.rate.toFixed(2)}`, 145, y);
-        pdf.text(`${symbol}${amount.toFixed(2)}`, 190, y, { align: "right" });
-        y += 9;
-      });
-      pdf.setDrawColor("#e5e7eb");
-      pdf.line(20, y, 190, y);
-      y += 10;
-      pdf.setFont("helvetica", "bold");
-      pdf.text("Total", 145, y);
-      pdf.setTextColor("#e8000d");
-      pdf.setFontSize(14);
-      pdf.text(`${symbol}${total.toFixed(2)}`, 190, y, { align: "right" });
-      pdf.setFontSize(10);
-      y += 18;
-      pdf.setTextColor("#667085");
-      pdf.setFont("helvetica", "normal");
-      pdf.text(`Payment terms: ${invoice.paymentTerms || "Due upon receipt"}`, 20, y);
-      pdf.text(`Status: ${invoice.paymentStatus || "Unpaid"}`, 20, y + 7);
-      pdf.save(`Buzz-Filing-Invoice-${invoice.invoiceNumber}.pdf`);
-    } catch (error) {
-      console.error("[v0] Failed to download invoice:", error);
-      alert("Unable to download this invoice right now.");
-    }
+  const handleDownload = (invoice: StoredInvoice) => {
+    setDownloadInvoice(invoice);
   };
+
+  useEffect(() => {
+    if (!downloadInvoice || !downloadPreviewRef.current) return;
+    let cancelled = false;
+    const createPdf = async () => {
+      try {
+        await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+        const { toJpeg } = await import("html-to-image");
+        const { jsPDF } = await import("jspdf");
+        const image = await toJpeg(downloadPreviewRef.current!, {
+          quality: 1,
+          pixelRatio: 4,
+          backgroundColor: "#ffffff",
+          skipFonts: false,
+        });
+        if (cancelled) return;
+        const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+        pdf.addImage(image, "JPEG", 0, 0, 210, 297, undefined, "FAST");
+        pdf.save(`Buzz-Filing-Invoice-${downloadInvoice.invoiceNumber}.pdf`);
+      } catch (error) {
+        console.error("[v0] Failed to download invoice:", error);
+        alert("Unable to download this invoice right now.");
+      } finally {
+        if (!cancelled) setDownloadInvoice(null);
+      }
+    };
+    void createPdf();
+    return () => { cancelled = true; };
+  }, [downloadInvoice]);
 
   const handleCreateShare = async (invoice: StoredInvoice) => {
     setSharingId(invoice._id);
@@ -240,7 +201,7 @@ export default function HistoryPage() {
               <Search className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="Search by invoice number, client, or team member..."
+                placeholder="Search by invoice number, client, service, or team member..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
@@ -256,6 +217,8 @@ export default function HistoryPage() {
                     invoice.invoiceNumber.toString().includes(query) ||
                     invoice.billTo.toLowerCase().includes(query) ||
                     invoice.teamMember?.toLowerCase().includes(query) ||
+                    invoice.serviceType?.toLowerCase().includes(query) ||
+                    invoice.lineItems?.some((item) => item.description?.toLowerCase().includes(query)) ||
                     invoice.invoiceDescription?.toLowerCase().includes(query)
                   );
                 })
@@ -410,6 +373,10 @@ export default function HistoryPage() {
           </div>}
         </DialogContent>
       </Dialog>
+
+      <div className="pointer-events-none fixed left-[-10000px] top-0 z-[-1]" aria-hidden="true">
+        {downloadInvoice && <InvoicePreview ref={downloadPreviewRef} data={downloadInvoice} />}
+      </div>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
