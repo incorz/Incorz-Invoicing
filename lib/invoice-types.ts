@@ -60,6 +60,13 @@ export const DEFAULT_INVOICE: Omit<InvoiceData, "invoiceNumber"> = {
   paymentTerms: "",
 };
 
+export const INVOICE_TEMPLATES: Record<string, { label: string; data: Omit<InvoiceData, "invoiceNumber" | "invoiceDate"> }> = {
+  llc: { label: "LLC Formation", data: { ...DEFAULT_INVOICE, serviceType: "LLC Formation", lineItems: [{ id: "template-llc", description: "LLC Formation Service", qty: 1, rate: 0 }], paymentTerms: "50% deposit required. Remaining balance due before filing submission." } },
+  itin: { label: "ITIN Application", data: { ...DEFAULT_INVOICE, serviceType: "ITIN Application", lineItems: [{ id: "template-itin", description: "ITIN Application Service", qty: 1, rate: 0 }], paymentTerms: "Payment is due before application processing begins." } },
+  accountSetup: { label: "Account Setup", data: { ...DEFAULT_INVOICE, serviceType: "Business Account Setup", lineItems: [{ id: "template-account", description: "Business Account Setup Service", qty: 1, rate: 0 }], paymentTerms: "Payment is due upon receipt." } },
+  multiService: { label: "Multi-Service Package", data: { ...DEFAULT_INVOICE, serviceType: "Multi-Service Package", lineItems: [{ id: "template-multi-llc", description: "LLC Formation Service", qty: 1, rate: 0 }, { id: "template-multi-itin", description: "ITIN Application Service", qty: 1, rate: 0 }, { id: "template-multi-account", description: "Business Account Setup Service", qty: 1, rate: 0 }], paymentTerms: "A deposit is required before work begins. Balance due upon completion." } },
+};
+
 export const CURRENCY_SYMBOLS: Record<Currency, string> = {
   USD: "$",
   GBP: "£",
