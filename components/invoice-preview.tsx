@@ -327,19 +327,17 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <colgroup>
             <col />
-            <col style={{ width: "90px" }} />
-            <col style={{ width: "100px" }} />
+            <col style={{ width: "150px" }} />
           </colgroup>
           <tbody>
             {totalsRows.map(([label, value]) => (
               <tr key={label}>
-                <td style={{ background: BRAND, padding: "5px 12px" }} />
                 <td style={{
                   background: BRAND,
                   padding: "5px 12px",
                   fontSize: "9px",
                   color: C.white,
-                  fontWeight: "400",
+                  fontWeight: "700",
                   textAlign: "left",
                   verticalAlign: "middle",
                 }}>{label}</td>
@@ -356,7 +354,6 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
             ))}
             {/* Balance row */}
             <tr>
-              <td style={{ background: BRAND, padding: "10px 12px" }} />
               <td style={{
                 background: BRAND,
                 padding: "10px 12px",
