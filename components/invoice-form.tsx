@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { InvoiceData, LineItem, PaymentStatus, Currency, CURRENCY_NAMES, CURRENCY_SYMBOLS, INVOICE_TEMPLATES } from "@/lib/invoice-types";
+import { InvoiceData, LineItem, PaymentStatus, Currency, CURRENCY_NAMES, CURRENCY_SYMBOLS } from "@/lib/invoice-types";
 
 interface InvoiceFormProps {
   data: InvoiceData;
@@ -40,21 +40,6 @@ export default function InvoiceForm({
 }: InvoiceFormProps) {
   const updateField = <K extends keyof InvoiceData>(key: K, value: InvoiceData[K]) => {
     setData((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const applyTemplate = (templateKey: string) => {
-    const template = INVOICE_TEMPLATES[templateKey];
-    if (!template) return;
-    setData((prev) => ({
-      ...prev,
-      ...template.data,
-      invoiceNumber: prev.invoiceNumber,
-      invoiceDate: prev.invoiceDate,
-      billTo: prev.billTo,
-      clientEmail: prev.clientEmail,
-      teamMember: prev.teamMember,
-      invoiceBy: prev.invoiceBy,
-    }));
   };
 
   const addLineItem = () => {
@@ -99,23 +84,6 @@ export default function InvoiceForm({
       </div>
 
       {/* ── Client Info ── */}
-      <div className="px-5 py-5 flex flex-col gap-4">
-        <div className="flex items-center justify-between gap-3">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/60">Templates</p>
-          <span className="text-[10px] text-muted-foreground">Prefill common services</span>
-        </div>
-        <Select onValueChange={applyTemplate}>
-          <SelectTrigger className="field-input h-9 px-4">
-            <SelectValue placeholder="Choose an invoice template" />
-          </SelectTrigger>
-          <SelectContent>
-            {Object.entries(INVOICE_TEMPLATES).map(([key, template]) => (
-              <SelectItem key={key} value={key}>{template.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
       <div className="px-5 py-5 flex flex-col gap-4">
         <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/60">Client</p>
         <div className="flex flex-col gap-1.5">
