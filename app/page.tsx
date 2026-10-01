@@ -30,7 +30,7 @@ function saveFormData(data: InvoiceData) {
 export default function Home() {
   const [invoiceData, setInvoiceData] = useState<InvoiceData>(() => ({
     ...DEFAULT_INVOICE,
-    invoiceNumber: "2100",
+    invoiceNumber: 2100,
   }));
 
   const [mounted, setMounted] = useState(false);
@@ -57,12 +57,12 @@ export default function Home() {
     fetch("/api/invoice-number")
       .then((r) => r.json())
       .then(({ invoiceNumber }) => {
-if (invoiceNumber !== undefined && invoiceNumber !== null) {
-            setInvoiceData((prev) => ({ ...prev, invoiceNumber: String(invoiceNumber) }));
+        if (typeof invoiceNumber === "number") {
+          setInvoiceData((prev) => ({ ...prev, invoiceNumber }));
         }
       })
       .catch(() => {
-        setInvoiceData((prev) => ({ ...prev, invoiceNumber: "2100" }));
+        setInvoiceData((prev) => ({ ...prev, invoiceNumber: 2100 }));
       })
       .finally(() => setInvoiceNumLoading(false));
   }, []);
@@ -127,12 +127,12 @@ if (invoiceNumber !== undefined && invoiceNumber !== null) {
     fetch("/api/invoice-number", { method: "POST" })
       .then((r) => r.json())
       .then(({ invoiceNumber }) => {
-if (invoiceNumber !== undefined && invoiceNumber !== null) {
-            setInvoiceData((prev) => ({ ...prev, invoiceNumber: String(invoiceNumber) }));
+        if (typeof invoiceNumber === "number") {
+          setInvoiceData((prev) => ({ ...prev, invoiceNumber }));
         }
       })
       .catch(() => {
-        setInvoiceData((prev) => ({ ...prev, invoiceNumber: String(Number(prev.invoiceNumber) + 1) }));
+        setInvoiceData((prev) => ({ ...prev, invoiceNumber: prev.invoiceNumber + 1 }));
       })
       .finally(() => { downloadingRef.current = false; });
   }, [invoiceData]);
@@ -140,7 +140,7 @@ if (invoiceNumber !== undefined && invoiceNumber !== null) {
   const handleReset = useCallback(() => {
     const fresh: InvoiceData = {
       ...DEFAULT_INVOICE,
-      invoiceNumber: "2100",
+      invoiceNumber: 2100,
       lineItems: [
         {
           id: crypto.randomUUID(),
@@ -155,7 +155,7 @@ if (invoiceNumber !== undefined && invoiceNumber !== null) {
     fetch("/api/invoice-number")
       .then((r) => r.json())
       .then(({ invoiceNumber }) => {
-        setInvoiceData({ ...fresh, invoiceNumber: invoiceNumber !== undefined && invoiceNumber !== null ? String(invoiceNumber) : "2100" });
+        setInvoiceData({ ...fresh, invoiceNumber: typeof invoiceNumber === "number" ? invoiceNumber : 2100 });
       })
       .catch(() => setInvoiceData(fresh));
 
@@ -274,7 +274,7 @@ if (invoiceNumber !== undefined && invoiceNumber !== null) {
           const copy = JSON.parse(duplicateInvoice) as Omit<InvoiceData, "invoiceNumber">;
           fetch("/api/invoice-number")
             .then((response) => response.json())
-            .then(({ invoiceNumber }) => setInvoiceData({ ...copy, invoiceNumber: invoiceNumber !== undefined && invoiceNumber !== null ? String(invoiceNumber) : "2100" }));
+            .then(({ invoiceNumber }) => setInvoiceData({ ...copy, invoiceNumber: typeof invoiceNumber === "number" ? invoiceNumber : 2100 }));
           setIsEditMode(false);
           sessionStorage.removeItem("duplicateInvoice");
         } catch (error) {
