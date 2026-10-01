@@ -12,7 +12,7 @@ export interface LineItem {
 export interface InvoiceData {
   billTo: string;
   clientEmail?: string;
-  invoiceNumber: number;
+  invoiceNumber: string;
   invoiceDate: string;
   serviceType: ServiceType;
   invoiceBy: string;
