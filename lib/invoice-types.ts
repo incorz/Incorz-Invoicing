@@ -1,5 +1,5 @@
 export type PaymentStatus = "Paid" | "Partial Paid" | "Unpaid";
-export type Currency = "USD" | "GBP";
+export type Currency = "USD" | "GBP" | "PKR";
 export type ServiceType = string;
 
 export interface LineItem {
@@ -70,9 +70,11 @@ export const INVOICE_TEMPLATES: Record<string, { label: string; data: Omit<Invoi
 export const CURRENCY_SYMBOLS: Record<Currency, string> = {
   USD: "$",
   GBP: "£",
+  PKR: "Rs",
 };
 
 export const CURRENCY_NAMES: Record<Currency, string> = {
   USD: "US Dollar",
   GBP: "British Pound",
+  PKR: "Pakistani Rupee",
 };
