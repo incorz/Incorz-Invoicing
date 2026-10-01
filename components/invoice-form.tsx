@@ -199,6 +199,7 @@ export default function InvoiceForm({
             <SelectContent>
               <SelectItem value="USD">USD - US Dollar</SelectItem>
               <SelectItem value="GBP">GBP - British Pound</SelectItem>
+                <SelectItem value="PKR">PKR - Pakistani Rupee (Rs)</SelectItem>
             </SelectContent>
           </Select>
         </div>
