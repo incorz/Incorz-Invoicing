@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, KeyboardEvent } from "react";
 
 const CORRECT = "2668";
 const DIGITS = 4;
-const PIN_VERIFIED_KEY = "buzz_filing_pin_verified";
+const PIN_VERIFIED_KEY = "incorz_pin_verified";
 
 export default function PasscodeGate({ children }: { children: React.ReactNode }) {
   const [unlocked, setUnlocked] = useState(false);
@@ -92,8 +92,8 @@ export default function PasscodeGate({ children }: { children: React.ReactNode }
       <div className="bg-white rounded-2xl shadow-lg border border-border px-10 py-12 flex flex-col items-center gap-8 w-full max-w-sm">
         {/* Logo */}
         <img
-          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/images-SdNz6vfYoJoMVJMUFtXCjHac5xozpZ.png"
-          alt="Buzz Filing"
+          src="/incorz-logo.svg"
+          alt="Incorz"
           className="h-9 w-auto object-contain"
         />
 

@@ -15,7 +15,7 @@ function getLimiter(name: string, limit: number, duration: Duration) {
     limiter = new Ratelimit({
       redis,
       limiter: Ratelimit.slidingWindow(limit, duration),
-      prefix: "buzzfiling:edge",
+      prefix: "incorz:edge",
       analytics: false,
     });
     limiters.set(key, limiter);

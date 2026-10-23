@@ -27,14 +27,14 @@ export interface InvoiceData {
 }
 
 export const COMPANY_INFO = {
-  name: "BUZZ FILING",
-  website: "www.buzzfiling.com",
-  email: "hello@buzzfiling.com",
-  filingEmail: "filings@buzzfiling.com",
+  name: "INCORZ",
+  website: "www.incorz.com",
+  email: "hello@incorz.com",
+  filingEmail: "filings@incorz.com",
   phones: ["+92 3394882800", "+44 (774) 058-3294", "+1 (786) 574-9305"],
   address:
     "Office No. 503, Plot 67/3, Zulekha Trade Centre, Alamgir Rd, CP & Berar Society CP & Berar CHS, Karachi, Pakistan",
-  bankAccountTitle: "BUZZ FILING",
+  bankAccountTitle: "INCORZ",
   bankAccountNumber: "1176314943776",
   iban: "PK22UNIL0109000314943776",
   bankName: "United Bank Limited (UBL)",

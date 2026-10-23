@@ -7,7 +7,7 @@ import PasscodeGate from "@/components/passcode-gate";
 import { SaveInvoiceModal } from "@/components/save-invoice-modal";
 import { InvoiceData, DEFAULT_INVOICE } from "@/lib/invoice-types";
 
-const FORM_DATA_KEY = "buzz_filing_form_data";
+const FORM_DATA_KEY = "incorz_form_data";
 
 function loadFormData(): InvoiceData | null {
   if (typeof window === "undefined") return null;
@@ -292,8 +292,8 @@ export default function Home() {
       <header className="sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-border shadow-sm">
         <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
           <img
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/images-SdNz6vfYoJoMVJMUFtXCjHac5xozpZ.png"
-            alt="Buzz Filing"
+            src="/incorz-logo.svg"
+            alt="Incorz"
             className="h-8 w-auto object-contain flex-shrink-0"
           />
           <span className="text-[10px] font-semibold tracking-[0.2em] uppercase text-muted-foreground hidden sm:block">

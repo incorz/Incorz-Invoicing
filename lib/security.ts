@@ -22,7 +22,7 @@ function getRedisLimiter(scope: string, limit: number, windowMs: number) {
     limiter = new Ratelimit({
       redis,
       limiter: Ratelimit.slidingWindow(limit, `${Math.max(1, Math.ceil(windowMs / 1000))} s`),
-      prefix: "buzzfiling:security",
+      prefix: "incorz:security",
       analytics: false,
     });
     limiters.set(key, limiter);

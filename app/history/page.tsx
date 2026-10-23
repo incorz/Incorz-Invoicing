@@ -117,7 +117,7 @@ export default function HistoryPage() {
         if (cancelled) return;
         const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
         pdf.addImage(image, "JPEG", 0, 0, 210, 297, undefined, "FAST");
-        pdf.save(`Buzz-Filing-Invoice-${downloadInvoice.invoiceNumber}.pdf`);
+        pdf.save(`Incorz-Invoice-${downloadInvoice.invoiceNumber}.pdf`);
       } catch (error) {
         console.error("[v0] Failed to download invoice:", error);
         alert("Unable to download this invoice right now.");
