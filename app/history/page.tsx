@@ -367,7 +367,7 @@ export default function HistoryPage() {
           </DialogHeader>
           {shareState && <div className="space-y-5">
             <div className="flex justify-center rounded-xl border border-[#e5e7eb] bg-white p-4"><img src={shareState.qr} alt="QR code for secure invoice link" className="h-52 w-52" /></div>
-            <div className="flex gap-2"><input readOnly value={shareState.url} className="min-w-0 flex-1 rounded-lg border border-[#e5e7eb] px-3 py-2 text-xs" /><Button type="button" onClick={() => navigator.clipboard.writeText(shareState.url)} className="shrink-0 bg-[#310971] hover:bg-[#240754]">Copy</Button></div>
+            <div className="flex gap-2"><input readOnly value={shareState.url} className="min-w-0 flex-1 rounded-lg border border-[#e5e7eb] px-3 py-2 text-xs" /><Button type="button" onClick={() => navigator.clipboard.writeText(shareState.url)} className="shrink-0 bg-[#310971] hover:bg-[#690fff]">Copy</Button></div>
             <a href={shareState.url} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 rounded-lg border border-[#310971] px-4 py-2 text-sm font-semibold text-[#310971]"><Download className="h-4 w-4" /> Open public invoice</a>
             <p className="text-center text-xs text-[#667085]">Anyone with this unguessable link can view this invoice. Create a new link to revoke the previous one.</p>
           </div>}
