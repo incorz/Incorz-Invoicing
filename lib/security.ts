@@ -1,34 +1,11 @@
 import crypto from "node:crypto";
 import type { Collection } from "mongodb";
-import { Ratelimit } from "@upstash/ratelimit";
-import { Redis } from "@upstash/redis";
 import { getDb } from "@/lib/mongodb";
 
 const RATE_LIMIT_COLLECTION = "security_rate_limits";
 
 type RateLimitResult = { allowed: boolean; retryAfterSeconds: number };
 type RateLimitRecord = { _id: string; count: number; windowStartedAt: Date; expiresAt: Date };
-
-const redis = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
-  ? Redis.fromEnv()
-  : null;
-const limiters = new Map<string, Ratelimit>();
-
-function getRedisLimiter(scope: string, limit: number, windowMs: number) {
-  if (!redis) return null;
-  const key = `${scope}:${limit}:${windowMs}`;
-  let limiter = limiters.get(key);
-  if (!limiter) {
-    limiter = new Ratelimit({
-      redis,
-      limiter: Ratelimit.slidingWindow(limit, `${Math.max(1, Math.ceil(windowMs / 1000))} s`),
-      prefix: "incorz:security",
-      analytics: false,
-    });
-    limiters.set(key, limiter);
-  }
-  return limiter;
-}
 
 function hashKey(value: string) {
   return crypto.createHash("sha256").update(value).digest("hex");
@@ -53,16 +30,6 @@ export async function consumeRateLimit(
   windowMs: number,
 ): Promise<RateLimitResult> {
   const identifier = `${getClientIp(request)}:${subject.toLowerCase().slice(0, 254)}`;
-  const limiter = getRedisLimiter(scope, limit, windowMs);
-
-  if (limiter) {
-    const result = await limiter.limit(identifier);
-    return {
-      allowed: result.success,
-      retryAfterSeconds: Math.max(1, Math.ceil((result.reset - Date.now()) / 1000)),
-    };
-  }
-
   const now = Date.now();
   const key = hashKey(`${scope}:${identifier}`);
   const collection = await getRateLimitCollection();
@@ -91,7 +58,6 @@ export function getClientIdentifier(request: Request) {
 }
 
 export async function ensureRateLimitIndexes() {
-  if (redis) return;
   const collection = await getRateLimitCollection();
   await collection.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 }

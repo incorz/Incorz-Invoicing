@@ -1,5 +1,4 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { checkEdgeTraffic, hasEdgeSecurityStore } from "@/lib/edge-security";
 
 const suspiciousPatterns = [
   /(?:union\s+select|select\s+.+\s+from|insert\s+into|drop\s+table|delete\s+from)/i,
@@ -9,33 +8,18 @@ const suspiciousPatterns = [
   /(?:sleep\s*\(|benchmark\s*\(|\bwaitfor\s+delay)/i,
 ];
 
-function getIp(request: NextRequest) {
-  const forwarded = request.headers.get("x-forwarded-for");
-  return (forwarded?.split(",")[0]?.trim() || request.headers.get("x-real-ip") || "unknown").slice(0, 100);
-}
-
 function looksSuspicious(request: NextRequest) {
   const target = `${request.nextUrl.pathname}?${request.nextUrl.search}`;
   return suspiciousPatterns.some((pattern) => pattern.test(target));
 }
 
-export async function proxy(request: NextRequest) {
-  if (!hasEdgeSecurityStore()) return NextResponse.next();
-
-  const ip = getIp(request);
-  const suspicious = looksSuspicious(request);
-  const result = await checkEdgeTraffic(ip, suspicious);
-
-  if (!result.allowed) {
+export function proxy(request: NextRequest) {
+  if (looksSuspicious(request)) {
     return NextResponse.json(
-      { error: result.blocked ? "Access temporarily blocked." : "Too many requests." },
+      { error: "Access blocked." },
       {
-        status: result.blocked ? 403 : 429,
-        headers: {
-          "Cache-Control": "no-store",
-          "Retry-After": String(result.retryAfter),
-          "X-Content-Type-Options": "nosniff",
-        },
+        status: 403,
+        headers: { "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" },
       },
     );
   }
