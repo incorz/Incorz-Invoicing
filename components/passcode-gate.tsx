@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, KeyboardEvent } from "react";
 
 const CORRECT = "2668";
 const DIGITS = 4;
-const PIN_VERIFIED_KEY = "buzz_filing_pin_verified";
+const PIN_VERIFIED_KEY = "incorz_pin_verified";
 
 export default function PasscodeGate({ children }: { children: React.ReactNode }) {
   const [unlocked, setUnlocked] = useState(false);
@@ -92,8 +92,8 @@ export default function PasscodeGate({ children }: { children: React.ReactNode }
       <div className="bg-white rounded-2xl shadow-lg border border-border px-10 py-12 flex flex-col items-center gap-8 w-full max-w-sm">
         {/* Logo */}
         <img
-          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/images-SdNz6vfYoJoMVJMUFtXCjHac5xozpZ.png"
-          alt="Buzz Filing"
+          src="/incorz-logo.svg"
+          alt="Incorz"
           className="h-9 w-auto object-contain"
         />
 
@@ -123,7 +123,7 @@ export default function PasscodeGate({ children }: { children: React.ReactNode }
               onKeyDown={(e) => handleKeyDown(i, e)}
               className="w-12 h-14 text-center text-xl font-bold rounded-xl border-2 outline-none transition-all cursor-pointer"
               style={{
-                borderColor: error ? "#e8000d" : code[i] ? "#e8000d" : "#e8e8e8",
+                borderColor: error ? "#310971" : code[i] ? "#310971" : "#e8e8e8",
                 color: "#000000",
                 background: code[i] ? "#fff1f2" : "#ffffff",
               }}
@@ -133,7 +133,7 @@ export default function PasscodeGate({ children }: { children: React.ReactNode }
 
         {/* Error */}
         {error && (
-          <p className="text-[11px] font-semibold" style={{ color: "#e8000d" }}>
+          <p className="text-[11px] font-semibold" style={{ color: "#310971" }}>
             Incorrect passcode. Please try again.
           </p>
         )}
@@ -142,7 +142,7 @@ export default function PasscodeGate({ children }: { children: React.ReactNode }
         <button
           onClick={() => submit(code.join(""))}
           className="w-full h-10 rounded-full text-xs font-bold text-white transition-opacity hover:opacity-90 active:opacity-75 cursor-pointer"
-          style={{ background: "#e8000d" }}
+          style={{ background: "#310971" }}
         >
           Unlock
         </button>

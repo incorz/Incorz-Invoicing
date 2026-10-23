@@ -1,17 +1,17 @@
 import type { Metadata } from 'next'
-import { Unbounded } from 'next/font/google'
+import { Manrope } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
-const _unbounded = Unbounded({
+const manrope = Manrope({
   subsets: ["latin"],
-  variable: "--font-sans",
+  variable: "--font-manrope",
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: 'Buzz Filing — Invoice Generator',
-  description: 'Professional invoice generator for Buzz Filing — LLC Formation, ITIN, and business filing services.',
+  title: 'Incorz — Invoice Generator',
+  description: 'Professional invoice generator for Incorz — LLC Formation, ITIN, and business filing services.',
   generator: 'v0.app',
   icons: {
     icon: '/favicon.png',
@@ -26,8 +26,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body suppressHydrationWarning className={`font-sans antialiased ${_unbounded.variable}`} style={{ fontFamily: "var(--font-sans, sans-serif)" }}>
+    <html lang="en" className={`${manrope.variable} bg-background`}>
+      <body suppressHydrationWarning className="font-sans antialiased">
         {children}
         <Analytics />
       </body>

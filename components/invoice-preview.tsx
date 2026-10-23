@@ -5,7 +5,7 @@ import { InvoiceData, COMPANY_INFO, CURRENCY_SYMBOLS } from "@/lib/invoice-types
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
-  red:      "#e8000d",
+  red:      "#310971",
   black:    "#000000",
   darkBg:   "#000000",
   darkBorder:"#000000",
@@ -20,9 +20,9 @@ const C = {
   white:    "#ffffff",
 } as const;
 
-const BRAND = "#ff0d13";
+const BRAND = "#310971";
 
-const FONT = "'Unbounded', Arial, sans-serif";
+const FONT = "'Manrope', Arial, sans-serif";
 
 const PAGE_W  = 794;   // A4 @ 96 dpi
 const PAGE_H  = 1123;
@@ -117,11 +117,11 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
       {/* ── HEADER ────────────────────────────────────────────────────────── */}
       <header style={{ padding: `32px ${PAD}px 0`, textAlign: "center" }}>
 
-        {/* Logo — 150px, no bottom gap */}
-        <div style={{ marginBottom: "0px" }}>
+  {/* Logo — 10px gap before contact details */}
+  <div style={{ marginBottom: "10px" }}>
           <img
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/images-G1AmblSQK7dZoDxTk5QwyOw4Ylv3hh.png"
-            alt="Buzz Filing"
+            src="/incorz-logo.svg"
+            alt="Incorz"
             crossOrigin="anonymous"
             style={{ height: "60px", width: "auto", objectFit: "contain", display: "inline-block" }}
           />
