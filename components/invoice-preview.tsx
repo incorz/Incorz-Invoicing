@@ -117,8 +117,8 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
       {/* ── HEADER ────────────────────────────────────────────────────────── */}
       <header style={{ padding: `32px ${PAD}px 0`, textAlign: "center" }}>
 
-        {/* Logo — 150px, no bottom gap */}
-        <div style={{ marginBottom: "0px" }}>
+  {/* Logo — 10px gap before contact details */}
+  <div style={{ marginBottom: "10px" }}>
           <img
             src="/incorz-logo.svg"
             alt="Incorz"
