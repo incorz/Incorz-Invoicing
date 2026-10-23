@@ -12,21 +12,21 @@
   --card-foreground: #0a0a0a;
   --popover: #ffffff;
   --popover-foreground: #0a0a0a;
-  --primary: #171717;
-  --primary-dark: #000000;
+  --primary: #310971;
+  --primary-dark: #240754;
   --primary-foreground: #fafafa;
   --secondary: #f5f5f5;
   --secondary-foreground: #0a0a0a;
   --muted: #f5f5f5;
   --muted-foreground: #737373;
   --accent: #f5f5f5;
-  --accent-foreground: #171717;
+  --accent-foreground: #310971;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
   --border: #e5e5e5;
   --input: #e5e5e5;
-  --ring: #0a0a0a;
-  --chart-1: #171717;
+  --ring: #310971;
+  --chart-1: #310971;
   --chart-2: #525252;
   --chart-3: #0a0a0a;
   --chart-4: #737373;
@@ -34,7 +34,7 @@
   --radius: 0.5rem;
   --sidebar: #ffffff;
   --sidebar-foreground: #0a0a0a;
-  --sidebar-primary: #171717;
+  --sidebar-primary: #310971;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #fafafa;
   --sidebar-accent-foreground: #0a0a0a;
@@ -137,7 +137,7 @@
     @apply rounded-2xl;
   }
   .brand-gradient {
-    background: #171717;
+    background: #310971;
   }
   .dark-gradient {
     background: #0a0a0a;

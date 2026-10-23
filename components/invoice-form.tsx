@@ -76,7 +76,7 @@ export default function InvoiceForm({
 
       {/* ── Title ── */}
       <div className="px-5 py-5 flex items-center gap-3">
-        <span className="w-0.5 h-5 rounded-full" style={{ background: "#171717" }} />
+        <span className="w-0.5 h-5 rounded-full" style={{ background: "#310971" }} />
         <div>
           <h2 className="text-sm font-bold" style={{ color: "#0d0f1a" }}>Invoice Details</h2>
           <p className="text-[11px] mt-0.5" style={{ color: "#6b7280" }}>Preview updates live as you type</p>
@@ -314,10 +314,10 @@ export default function InvoiceForm({
 
           {/* Balance (read-only) */}
           <div className="flex flex-col gap-1.5">
-            <Label className="text-xs font-bold" style={{ color: "#171717" }}>Balance</Label>
+            <Label className="text-xs font-bold" style={{ color: "#310971" }}>Balance</Label>
             <div
               className="h-9 flex items-center px-4 rounded-full text-xs font-bold text-white tabular-nums"
-              style={{ background: "#171717" }}
+              style={{ background: "#310971" }}
             >
               {CURRENCY_SYMBOLS[data.currency]}{balance.toFixed(2)}
             </div>
@@ -343,14 +343,14 @@ export default function InvoiceForm({
 
         <Button
           className="w-full h-10 text-white font-semibold rounded-full cursor-pointer text-xs tracking-wider border-0 transition-opacity hover:opacity-90"
-          style={{ background: "#171717" }}
+          style={{ background: "#310971" }}
           onClick={onDownload}
         >
           Download PDF
         </Button>
         <Button
           variant="outline"
-          className="w-full h-9 rounded-full cursor-pointer text-xs font-semibold text-[#171717] border-[#171717]/30 hover:bg-neutral-100"
+          className="w-full h-9 rounded-full cursor-pointer text-xs font-semibold text-[#310971] border-[#310971]/30 hover:bg-neutral-100"
           onClick={onSendInvoice}
         >
           Send Invoice by Email
@@ -365,7 +365,7 @@ export default function InvoiceForm({
         {isEditMode && onCreateNew && (
           <Button
             className="w-full h-9 rounded-full cursor-pointer text-xs font-semibold text-white border-0 transition-opacity hover:opacity-90"
-            style={{ background: "#171717" }}
+            style={{ background: "#310971" }}
             onClick={onCreateNew}
           >
             Create New Invoice

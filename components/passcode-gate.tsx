@@ -123,7 +123,7 @@ export default function PasscodeGate({ children }: { children: React.ReactNode }
               onKeyDown={(e) => handleKeyDown(i, e)}
               className="w-12 h-14 text-center text-xl font-bold rounded-xl border-2 outline-none transition-all cursor-pointer"
               style={{
-                borderColor: error ? "#171717" : code[i] ? "#171717" : "#e8e8e8",
+                borderColor: error ? "#310971" : code[i] ? "#310971" : "#e8e8e8",
                 color: "#000000",
                 background: code[i] ? "#fff1f2" : "#ffffff",
               }}
@@ -133,7 +133,7 @@ export default function PasscodeGate({ children }: { children: React.ReactNode }
 
         {/* Error */}
         {error && (
-          <p className="text-[11px] font-semibold" style={{ color: "#171717" }}>
+          <p className="text-[11px] font-semibold" style={{ color: "#310971" }}>
             Incorrect passcode. Please try again.
           </p>
         )}
@@ -142,7 +142,7 @@ export default function PasscodeGate({ children }: { children: React.ReactNode }
         <button
           onClick={() => submit(code.join(""))}
           className="w-full h-10 rounded-full text-xs font-bold text-white transition-opacity hover:opacity-90 active:opacity-75 cursor-pointer"
-          style={{ background: "#171717" }}
+          style={{ background: "#310971" }}
         >
           Unlock
         </button>
