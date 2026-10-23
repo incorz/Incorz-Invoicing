@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/mongodb";
 
+export const dynamic = "force-dynamic";
+
 // DB document: { "_id": "invoice_number", "value": 1 }
 // value: 1  → invoice 2100, value: 2 → invoice 2101, etc.
 const DOC_ID      = "invoice_number";
