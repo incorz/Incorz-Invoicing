@@ -5,7 +5,7 @@ import { InvoiceData, COMPANY_INFO, CURRENCY_SYMBOLS } from "@/lib/invoice-types
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
-  red:      "#e8000d",
+  red:      "#171717",
   black:    "#000000",
   darkBg:   "#000000",
   darkBorder:"#000000",
@@ -20,9 +20,9 @@ const C = {
   white:    "#ffffff",
 } as const;
 
-const BRAND = "#ff0d13";
+const BRAND = "#171717";
 
-const FONT = "'Unbounded', Arial, sans-serif";
+const FONT = "'Manrope', Arial, sans-serif";
 
 const PAGE_W  = 794;   // A4 @ 96 dpi
 const PAGE_H  = 1123;

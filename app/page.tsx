@@ -308,7 +308,7 @@ export default function Home() {
             </a>
             <span
               className="text-[10px] font-bold text-white px-3 py-1 rounded-full tabular-nums flex-shrink-0"
-              style={{ background: "linear-gradient(135deg, #ff0d13 0%, #ff6b00 100%)" }}
+              style={{ background: "#171717" }}
             >
               #{invoiceData.invoiceNumber}
             </span>
@@ -338,7 +338,7 @@ export default function Home() {
         <main className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-10" style={{ background: "#f3f4f6" }}>
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
-              <span className="w-1 h-4 rounded-full inline-block" style={{ background: "linear-gradient(135deg, #ff0d13 0%, #ff6b00 100%)" }} />
+              <span className="w-1 h-4 rounded-full inline-block" style={{ background: "#171717" }} />
               <p className="text-[10px] font-bold tracking-[0.2em] uppercase" style={{ color: "#0d0f1a" }}>
                 Live Preview
               </p>
@@ -361,9 +361,9 @@ export default function Home() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4" role="dialog" aria-modal="true" aria-labelledby="email-status-title">
           <div className="w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-2xl border border-border">
             {emailStatus === "sending" ? (
-              <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-red-100 border-t-[#e8000d]" aria-label="Sending email" />
+              <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-neutral-200 border-t-[#171717]" aria-label="Sending email" />
             ) : (
-              <div className={`mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-full text-lg font-bold text-white ${emailStatus === "success" ? "bg-emerald-500" : "bg-[#e8000d]"}`}>
+              <div className={`mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-full text-lg font-bold text-white ${emailStatus === "success" ? "bg-emerald-500" : "bg-[#171717]"}`}>
                 {emailStatus === "success" ? "✓" : "!"}
               </div>
             )}
@@ -375,7 +375,7 @@ export default function Home() {
               <button
                 type="button"
                 onClick={() => setEmailStatus("idle")}
-                className="mt-5 h-10 w-full cursor-pointer rounded-full bg-[#e8000d] text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                className="mt-5 h-10 w-full cursor-pointer rounded-full bg-[#171717] text-sm font-semibold text-white transition-opacity hover:opacity-90"
               >
                 {emailStatus === "success" ? "Done" : "Close"}
               </button>
