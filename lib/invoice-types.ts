@@ -12,6 +12,7 @@ export interface LineItem {
 export interface InvoiceData {
   billTo: string;
   billToAddress?: string;
+  billToAddress2?: string;
   clientEmail?: string;
   invoiceNumber: number;
   invoiceDate: string;
@@ -43,6 +44,7 @@ export const COMPANY_INFO = {
 export const DEFAULT_INVOICE: Omit<InvoiceData, "invoiceNumber"> = {
   billTo: "",
   billToAddress: "",
+  billToAddress2: "",
   invoiceDate: new Date().toISOString().split("T")[0],
   serviceType: "LLC Formation",
   invoiceBy: "",
