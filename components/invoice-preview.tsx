@@ -62,14 +62,16 @@ interface InvoicePreviewProps {
   data: InvoiceData;
 }
 
+const PAID_GREEN = "#16a34a";
+
 const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }, ref) => {
   // ── Derived values
   const subTotal = data.lineItems.reduce((sum, item) => sum + item.qty * item.rate, 0);
   const balance  = subTotal - data.discount - data.paymentReceived;
 
   const formattedDate = data.invoiceDate
-    ? new Date(data.invoiceDate + "T00:00:00").toLocaleDateString("en-GB", {
-        day: "2-digit", month: "2-digit", year: "numeric",
+    ? new Date(data.invoiceDate + "T00:00:00").toLocaleDateString("en-US", {
+        month: "2-digit", day: "2-digit", year: "numeric",
       })
     : "";
 
@@ -176,7 +178,7 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                   borderTop: "none",
                   fontWeight: "700",
                   fontSize: "14px",
-                  color: C.black,
+                  color: data.paymentStatus === "Paid" ? PAID_GREEN : C.black,
                   textAlign: "center",
                   verticalAlign: "middle",
                   padding: "16px 8px",
