@@ -70,16 +70,16 @@ const PAYMENT_LABEL   = "#6b6b7b";
 
 const PAYMENT_ROWS: { label: string; value: string }[][] = [
   [
-    { label: "Payoneer Email", value: "incorz.official@gmail.com" },
-    { label: "Account Title",  value: "Incorz Inc" },
+    { label: "Account Title",   value: "Incorz Inc" },
+    { label: "Type of Account", value: "Business Checking" },
   ],
   [
-    { label: "Account Type", value: "Checking" },
-    { label: "Bank",         value: "Citibank" },
+    { label: "Account Number", value: "167506123600" },
+    { label: "Routing Number", value: "091000022" },
   ],
   [
-    { label: "Account Number", value: "70581490002161689" },
-    { label: "Routing Number", value: "031100209" },
+    { label: "Recipient Address", value: "25 SE 2nd Ave Ste 550 Miami, FL 33131" },
+    { label: "Bank Name",         value: "US BANK NA" },
   ],
 ];
 
