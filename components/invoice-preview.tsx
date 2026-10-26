@@ -64,6 +64,25 @@ interface InvoicePreviewProps {
 
 const PAID_GREEN = "#16a34a";
 
+const PAYMENT_CARD_BG = "#f2f0f9";
+const PAYMENT_DIVIDER = "#b9b1cc";
+const PAYMENT_LABEL   = "#6b6b7b";
+
+const PAYMENT_ROWS: { label: string; value: string }[][] = [
+  [
+    { label: "Payoneer Email", value: "incorz.official@gmail.com" },
+    { label: "Account Title",  value: "Incorz Inc" },
+  ],
+  [
+    { label: "Account Type", value: "Checking" },
+    { label: "Bank",         value: "Citibank" },
+  ],
+  [
+    { label: "Account Number", value: "70581490002161689" },
+    { label: "Routing Number", value: "031100209" },
+  ],
+];
+
 const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }, ref) => {
   // ── Derived values
   const subTotal = data.lineItems.reduce((sum, item) => sum + item.qty * item.rate, 0);
@@ -390,10 +409,53 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
         </div>
       </div>
 
+      {/* ── PAYMENT DETAILS ───────────────────────────────────────────────── */}
+      <div style={{ padding: `0 ${PAD}px 24px` }}>
+        <div style={{
+          fontSize: "8px",
+          fontWeight: "800",
+          textTransform: "uppercase",
+          letterSpacing: "0.6px",
+          color: BRAND,
+          paddingBottom: "6px",
+          borderBottom: `1.5px solid ${PAYMENT_DIVIDER}`,
+          marginBottom: "10px",
+        }}>
+          Payment Details
+        </div>
+        <div style={{ background: PAYMENT_CARD_BG, borderRadius: "8px", padding: "10px 24px 12px" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
+            <tbody>
+              {PAYMENT_ROWS.map((row, i) => (
+                <tr key={i}>
+                  {row.map(({ label, value }) => (
+                    <td key={label} style={{ padding: "4px 0", verticalAlign: "top" }}>
+                      <div style={{
+                        fontSize: "7px",
+                        fontWeight: "800",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.3px",
+                        color: PAYMENT_LABEL,
+                        marginBottom: "2px",
+                      }}>
+                        {label}
+                      </div>
+                      <div style={{ fontSize: "10.5px", fontWeight: "700", color: C.black }}>
+                        {value}
+                      </div>
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       {/* ── FLEX SPACER ───────────���───────����───────────────────────────────── */}
       <div style={{ flex: 1 }} />
 
-      {/* ── PRE-FOOTER ROW ────────────────────────────────────────────────── */}
+      {/* ── PRE-FOOTER ROW ──────────────��─────────────────────────────────── */}
       <table style={{
         width: "100%",
         borderCollapse: "collapse",
