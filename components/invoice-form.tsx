@@ -69,7 +69,7 @@ export default function InvoiceForm({
   };
 
   const subTotal = data.lineItems.reduce((sum, item) => sum + item.qty * item.rate, 0);
-  const balance = subTotal - data.discount - data.paymentReceived;
+  const balance = subTotal - data.discount;
 
   return (
     <div className="flex flex-col divide-y divide-border">
@@ -310,21 +310,15 @@ export default function InvoiceForm({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="paymentReceived" className="text-xs">Payment Received ({CURRENCY_SYMBOLS[data.currency]})</Label>
-            <Input
-              id="paymentReceived"
-              type="text"
-              inputMode="decimal"
-              placeholder="0"
-              value={data.paymentReceived === 0 ? "" : data.paymentReceived}
-              onChange={(e) => updateField("paymentReceived", parseFloat(e.target.value) || 0)}
-              className="field-input h-9"
-            />
+            <Label className="text-xs">Tax (0%)</Label>
+            <div className="field-input h-9 flex items-center px-4 text-xs tabular-nums">
+              {CURRENCY_SYMBOLS[data.currency]}0.00
+            </div>
           </div>
 
-          {/* Balance (read-only) */}
+          {/* Total (read-only) */}
           <div className="flex flex-col gap-1.5">
-            <Label className="text-xs font-bold" style={{ color: "#310971" }}>Balance</Label>
+            <Label className="text-xs font-bold" style={{ color: "#310971" }}>Total</Label>
             <div
               className="h-9 flex items-center px-4 rounded-full text-xs font-bold text-white tabular-nums"
               style={{ background: "#310971" }}
@@ -335,9 +329,9 @@ export default function InvoiceForm({
         </div>
       </div>
 
-      {/* ── Payment Terms ── */}
+      {/* ── Terms & Notes ── */}
       <div className="px-5 py-5 flex flex-col gap-4">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/60">Payment Terms</p>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/60">Terms &amp; Notes</p>
         <Textarea
           placeholder="e.g. An advance payment of $225 has been received. The remaining balance will be due once the EIN is issued."
           value={data.paymentTerms}

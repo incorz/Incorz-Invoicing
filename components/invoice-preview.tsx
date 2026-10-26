@@ -64,10 +64,29 @@ interface InvoicePreviewProps {
 
 const PAID_GREEN = "#16a34a";
 
+const PAYMENT_CARD_BG = "#f2f0f9";
+const PAYMENT_DIVIDER = "#b9b1cc";
+const PAYMENT_LABEL   = "#6b6b7b";
+
+const PAYMENT_ROWS: { label: string; value: string }[][] = [
+  [
+    { label: "Payoneer Email", value: "incorz.official@gmail.com" },
+    { label: "Account Title",  value: "Incorz Inc" },
+  ],
+  [
+    { label: "Account Type", value: "Checking" },
+    { label: "Bank",         value: "Citibank" },
+  ],
+  [
+    { label: "Account Number", value: "70581490002161689" },
+    { label: "Routing Number", value: "031100209" },
+  ],
+];
+
 const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }, ref) => {
   // ── Derived values
   const subTotal = data.lineItems.reduce((sum, item) => sum + item.qty * item.rate, 0);
-  const balance  = subTotal - data.discount - data.paymentReceived;
+  const balance  = subTotal - data.discount;
 
   const formattedDate = data.invoiceDate
     ? new Date(data.invoiceDate + "T00:00:00").toLocaleDateString("en-US", {
@@ -87,14 +106,7 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
   const totalsRows: [string, string][] = [
     ["Sub Total", `${CURRENCY_SYMBOLS[data.currency]}${subTotal.toFixed(2)}`],
     ["Discount",  `${CURRENCY_SYMBOLS[data.currency]}${data.discount.toFixed(2)}`],
-    ["Payment",   `${CURRENCY_SYMBOLS[data.currency]}${data.paymentReceived.toFixed(2)}`],
-  ];
-
-  const bankRows: [string, string][] = [
-    ["Account Title",   COMPANY_INFO.bankAccountTitle],
-    ["Account Number",  COMPANY_INFO.bankAccountNumber],
-    ["IBAN",            COMPANY_INFO.iban],
-    ["Bank Name",       COMPANY_INFO.bankName],
+    ["Tax (0%)",  `${CURRENCY_SYMBOLS[data.currency]}0.00`],
   ];
 
   // ── Root page
@@ -311,9 +323,7 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                   <td style={cell({ fontWeight: "500", padding: "9px 12px" })}>
                     {item.description || "—"}
                   </td>
-                  <td style={cell({ color: C.black, fontSize: "8.5px", padding: "9px 12px" })}>
-                    {item.rate === 0 ? "INCLUDED" : ""}
-                  </td>
+                  <td style={cell({ padding: "9px 12px" })} />
                   <td style={cell({ textAlign: "center", padding: "9px 12px" })}>{item.qty}</td>
                   <td style={cell({ textAlign: "right",  padding: "9px 12px" })}>
                     {item.rate === 0 ? "—" : `${CURRENCY_SYMBOLS[data.currency]}${item.rate.toFixed(0)}`}
@@ -359,7 +369,7 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                 }}>{value}</td>
               </tr>
             ))}
-            {/* Balance row */}
+            {/* Total row */}
             <tr>
               <td style={{ background: BRAND, padding: "10px 12px" }} />
               <td style={{
@@ -370,7 +380,7 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                 color: C.white,
                 textAlign: "left",
                 verticalAlign: "middle",
-              }}>Balance</td>
+              }}>TOTAL</td>
               <td style={{
                 background: BRAND,
                 padding: "10px 12px",
@@ -391,57 +401,61 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
         <span style={{ fontSize: "18px", fontWeight: "900", color: BRAND }}>business!</span>
       </div>
 
-      {/* ── PAYMENT TERMS ─────────────────────────────────────────────────── */}
-      <div style={{ padding: `0 ${PAD}px 20px` }}>
-        <div style={labelStyle}>PAYMENT TERMS</div>
+      {/* ── TERMS & NOTES ─────────────────────────────────────────────────── */}
+      <div style={{ padding: `0 ${PAD}px 24px` }}>
+        <div style={labelStyle}>TERMS &amp; NOTES</div>
         <div style={{ fontSize: "9px", color: C.black, lineHeight: "1.8" }}>
           {data.paymentTerms || "—"}
         </div>
       </div>
 
-      {/* ── PKR BANK ──────────────────────────────────────────────────────── */}
-      <div style={{ padding: `0 ${PAD}px 16px` }}>
-        <div style={labelStyle}>PKR BANK</div>
-        <div>
-          {bankRows.map(([label, value]) => (
-            <div key={label} style={{ fontSize: "9px", color: C.black, lineHeight: "1.6", marginBottom: "3px" }}>
-              {label}: {value}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* ── USD BANK ──────────────────────────────────────────────────────── */}
-      <div style={{ padding: `0 ${PAD}px 16px` }}>
-        <div style={labelStyle}>USD BANK</div>
-        <div>
-          {[
-            ["Account Title",    "INCORZ LLC"],
-            ["Type of Account",  "Checking"],
-            ["Account Number",   "660270560183679"],
-            ["Routing Number",   "121145433"],
-            ["Bank Name",        "Column N.A."],
-            ["Recipient Address","1209 Mountain Road Place Northeast, STE R Albuquerque, NM 87110"],
-          ].map(([label, value]) => (
-            <div key={label} style={{ fontSize: "9px", color: C.black, lineHeight: "1.6", marginBottom: "3px" }}>
-              {label}: {value}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* ── PAYONEER ──────────────────────────────────────────────────────── */}
+      {/* ── PAYMENT DETAILS ───────────────────────────────────────────────── */}
       <div style={{ padding: `0 ${PAD}px 24px` }}>
-        <div style={labelStyle}>PAYONEER</div>
-        <div style={{ fontSize: "9px", color: C.black, lineHeight: "1.6" }}>
-          incorz.official@gmail.com
+        <div style={{
+          fontSize: "8px",
+          fontWeight: "800",
+          textTransform: "uppercase",
+          letterSpacing: "0.6px",
+          color: BRAND,
+          paddingBottom: "6px",
+          borderBottom: `1.5px solid ${PAYMENT_DIVIDER}`,
+          marginBottom: "10px",
+        }}>
+          Payment Details
+        </div>
+        <div style={{ background: PAYMENT_CARD_BG, borderRadius: "8px", padding: "10px 24px 12px" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
+            <tbody>
+              {PAYMENT_ROWS.map((row, i) => (
+                <tr key={i}>
+                  {row.map(({ label, value }) => (
+                    <td key={label} style={{ padding: "4px 0", verticalAlign: "top" }}>
+                      <div style={{
+                        fontSize: "7px",
+                        fontWeight: "800",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.3px",
+                        color: PAYMENT_LABEL,
+                        marginBottom: "2px",
+                      }}>
+                        {label}
+                      </div>
+                      <div style={{ fontSize: "10.5px", fontWeight: "700", color: C.black }}>
+                        {value}
+                      </div>
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 
       {/* ── FLEX SPACER ───────────���───────����───────────────────────────────── */}
       <div style={{ flex: 1 }} />
 
-      {/* ── PRE-FOOTER ROW ────────────────────────────────────────────────── */}
+      {/* ── PRE-FOOTER ROW ──────────────��─────────────────────────────────── */}
       <table style={{
         width: "100%",
         borderCollapse: "collapse",

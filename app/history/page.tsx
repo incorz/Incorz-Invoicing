@@ -151,7 +151,7 @@ export default function HistoryPage() {
 
   const calculateTotal = (invoice: StoredInvoice) => {
     const subtotal = invoice.lineItems.reduce((sum, item) => sum + item.qty * item.rate, 0);
-    return subtotal - invoice.discount + invoice.paymentReceived;
+    return subtotal - invoice.discount;
   };
 
   if (loading) {
