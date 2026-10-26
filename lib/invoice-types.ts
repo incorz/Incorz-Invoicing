@@ -30,7 +30,6 @@ export const COMPANY_INFO = {
   name: "INCORZ",
   website: "www.incorz.com",
   email: "hello@incorz.com",
-  filingEmail: "filings@incorz.com",
   phones: ["+92 3394882800", "+44 (774) 058-3294", "+1 (786) 574-9305"],
   address:
     "25 SE 2nd Ave Ste 550 Miami, FL 33131",
