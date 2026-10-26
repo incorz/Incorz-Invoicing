@@ -251,7 +251,7 @@ export default function HistoryPage() {
                           </span>
                         </div>
                         <p className="text-xs text-muted-foreground">
-                          {new Date(invoice.createdAt).toLocaleDateString()}
+                          {new Date(invoice.createdAt).toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "numeric" })}
                         </p>
                       </div>
 
