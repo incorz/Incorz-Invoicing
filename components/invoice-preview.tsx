@@ -221,6 +221,17 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                 }}>
                   {data.billTo || "—"}
                 </div>
+                {data.billToAddress?.trim() && (
+                  <div style={{
+                    fontSize: "8.5px",
+                    fontWeight: "400",
+                    color: C.black,
+                    lineHeight: 1.5,
+                    marginTop: "2px",
+                  }}>
+                    {data.billToAddress}
+                  </div>
+                )}
               </td>
 
               {/* ── Invoice fields ── */}
