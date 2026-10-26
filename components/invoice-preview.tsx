@@ -20,9 +20,9 @@ const C = {
   white:    "#ffffff",
 } as const;
 
-const BRAND = "#310971";
+const BRAND = "#8B1FA9";
 
-const FONT = "'Manrope', Arial, sans-serif";
+const FONT = "'manrope', Arial, sans-serif";
 
 const PAGE_W  = 794;   // A4 @ 96 dpi
 const PAGE_H  = 1123;
@@ -350,60 +350,118 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
         </table>
 
         {/* Totals block — table for reliable html2canvas rendering */}
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <colgroup>
-            <col />
-            <col style={{ width: "90px" }} />
-            <col style={{ width: "100px" }} />
-          </colgroup>
-          <tbody>
-            {totalsRows.map(([label, value]) => (
-              <tr key={label}>
-                <td style={{ background: BRAND, padding: "5px 12px" }} />
-                <td style={{
-                  background: BRAND,
-                  padding: "5px 12px",
-                  fontSize: "9px",
-                  color: C.white,
-                  fontWeight: "400",
-                  textAlign: "left",
-                  verticalAlign: "middle",
-                }}>{label}</td>
-                <td style={{
-                  background: BRAND,
-                  padding: "5px 12px",
-                  fontSize: "9.5px",
-                  color: C.white,
-                  fontWeight: "700",
-                  textAlign: "right",
-                  verticalAlign: "middle",
-                }}>{value}</td>
-              </tr>
-            ))}
-            {/* Total row */}
-            <tr>
-              <td style={{ background: BRAND, padding: "10px 12px" }} />
-              <td style={{
-                background: BRAND,
-                padding: "10px 12px",
-                fontSize: "15px",
-                fontWeight: "900",
-                color: C.white,
-                textAlign: "left",
-                verticalAlign: "middle",
-              }}>TOTAL</td>
-              <td style={{
-                background: BRAND,
-                padding: "10px 12px",
-                fontSize: "14px",
-                fontWeight: "900",
-                color: C.white,
-                textAlign: "right",
-                verticalAlign: "middle",
-              }}>{CURRENCY_SYMBOLS[data.currency]}{balance.toFixed(2)}</td>
-            </tr>
-          </tbody>
-        </table>
+        
+{/* Totals block — centered and PDF compatible */}
+<div
+  style={{
+    width: "100%",
+    backgroundColor: BRAND,
+    padding: "20px 16px",
+    boxSizing: "border-box",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  }}
+>
+  <table
+    style={{
+      width: "100%",
+      borderCollapse: "collapse",
+      tableLayout: "fixed",
+    }}
+  >
+    <colgroup>
+      <col />
+      <col style={{ width: "100px" }} />
+      <col style={{ width: "110px" }} />
+    </colgroup>
+
+    <tbody>
+      {totalsRows.map(([label, value]) => (
+        <tr key={label}>
+          <td
+            style={{
+              padding: "5px 12px",
+              backgroundColor: BRAND,
+            }}
+          />
+
+          <td
+            style={{
+              padding: "5px 4px",
+              backgroundColor: BRAND,
+              fontSize: "10px",
+              color: C.white,
+              fontWeight: 400,
+              textAlign: "left",
+              verticalAlign: "middle",
+              lineHeight: "16px",
+            }}
+          >
+            {label}
+          </td>
+
+          <td
+            style={{
+              padding: "5px 0",
+              backgroundColor: BRAND,
+              fontSize: "10px",
+              color: C.white,
+              fontWeight: 700,
+              textAlign: "right",
+              verticalAlign: "middle",
+              lineHeight: "16px",
+            }}
+          >
+            {value}
+          </td>
+        </tr>
+      ))}
+
+      {/* Final Total */}
+      <tr>
+        <td
+          style={{
+            padding: "8px 12px 4px",
+            backgroundColor: BRAND,
+          }}
+        />
+
+        <td
+          style={{
+            padding: "8px 4px 4px",
+            backgroundColor: BRAND,
+            fontSize: "15px",
+            fontWeight: 900,
+            color: C.white,
+            textAlign: "left",
+            verticalAlign: "middle",
+            lineHeight: "20px",
+          }}
+        >
+          TOTAL
+        </td>
+
+        <td
+          style={{
+            padding: "8px 0 4px",
+            backgroundColor: BRAND,
+            fontSize: "14px",
+            fontWeight: 900,
+            color: C.white,
+            textAlign: "right",
+            verticalAlign: "middle",
+            lineHeight: "20px",
+          }}
+        >
+          {CURRENCY_SYMBOLS[data.currency]}
+          {balance.toFixed(2)}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
       </div>
 
       {/* ── THANK YOU ─────────────────────────────────────────────────────── */}
