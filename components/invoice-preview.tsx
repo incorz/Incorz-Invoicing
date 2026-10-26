@@ -131,18 +131,12 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
         <p style={{ fontSize: "9.5px", color: C.black, margin: "0 0 3px", letterSpacing: "0.1px" }}>
           {COMPANY_INFO.address}
         </p>
-        <p style={{ fontSize: "9.5px", color: C.black, margin: "0 0 3px" }}>
+        <p style={{ fontSize: "9.5px", color: C.black, margin: "0 0 20px" }}>
           {COMPANY_INFO.website}
           <span style={{ margin: "0 5px", color: C.black }}>•</span>
-  {COMPANY_INFO.email}
-  </p>
-        <p style={{ fontSize: "9.5px", color: C.black, margin: "0 0 20px" }}>
-          {COMPANY_INFO.phones.map((p, i) => (
-            <span key={p}>
-              {i > 0 && <span style={{ margin: "0 5px", color: C.black }}>•</span>}
-              {p}
-            </span>
-          ))}
+          {COMPANY_INFO.email}
+          <span style={{ margin: "0 5px", color: C.black }}>•</span>
+          {COMPANY_INFO.phone}
         </p>
 
       </header>
