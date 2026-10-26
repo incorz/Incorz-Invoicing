@@ -30,7 +30,7 @@ export const COMPANY_INFO = {
   name: "INCORZ",
   website: "www.incorz.com",
   email: "hello@incorz.com",
-  phone: "+1 (302) 209-8440",
+  phone: "(302) 209-8440",
   address:
     "25 SE 2nd Ave Ste 550 Miami, FL 33131",
   bankAccountTitle: "INCORZ",
