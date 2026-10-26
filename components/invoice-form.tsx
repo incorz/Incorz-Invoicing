@@ -97,15 +97,25 @@ export default function InvoiceForm({
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="billToAddress" className="text-xs">Address</Label>
-          <Input
-            id="billToAddress"
-            placeholder="Client address"
-            value={data.billToAddress ?? ""}
-            onChange={(e) => updateField("billToAddress", e.target.value)}
-            className="field-input h-9"
-          />
-        </div>
+  <Label htmlFor="billToAddress" className="text-xs">Address Line 1</Label>
+  <Input
+  id="billToAddress"
+  placeholder="Street address"
+  value={data.billToAddress ?? ""}
+  onChange={(e) => updateField("billToAddress", e.target.value)}
+  className="field-input h-9"
+  />
+  </div>
+  <div className="flex flex-col gap-1.5">
+  <Label htmlFor="billToAddress2" className="text-xs">Address Line 2</Label>
+  <Input
+  id="billToAddress2"
+  placeholder="City, State ZIP"
+  value={data.billToAddress2 ?? ""}
+  onChange={(e) => updateField("billToAddress2", e.target.value)}
+  className="field-input h-9"
+  />
+  </div>
       </div>
 
       {/* ── Invoice Meta ── */}
