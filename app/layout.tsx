@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
-import { Manrope } from 'next/font/google'
+import { Unbounded } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
-const manrope = Manrope({
+const unbounded = Unbounded({
   subsets: ["latin"],
-  variable: "--font-manrope",
+  variable: "--font-unbounded",
   display: "swap",
 });
 
@@ -26,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${manrope.variable} bg-background`}>
+    <html lang="en" className={`${unbounded.variable} bg-background`}>
       <body suppressHydrationWarning className="font-sans antialiased">
         {children}
         <Analytics />
