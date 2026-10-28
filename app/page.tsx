@@ -58,7 +58,7 @@ export default function Home() {
       .then((r) => r.json())
       .then(({ invoiceNumber }) => {
         if (typeof invoiceNumber === "number") {
-          setInvoiceData((prev) => ({ ...prev, invoiceNumber }));
+          setInvoiceData((prev) => prev.isCustomInvoiceNumber ? prev : { ...prev, invoiceNumber });
         }
       })
       .catch(() => {
@@ -124,11 +124,16 @@ export default function Home() {
     }
 
     // Increment counter in MongoDB and update local state with new number
+    if (invoiceData.isCustomInvoiceNumber) {
+      downloadingRef.current = false;
+      return;
+    }
+
     fetch("/api/invoice-number", { method: "POST" })
       .then((r) => r.json())
       .then(({ invoiceNumber }) => {
         if (typeof invoiceNumber === "number") {
-          setInvoiceData((prev) => ({ ...prev, invoiceNumber }));
+          setInvoiceData((prev) => prev.isCustomInvoiceNumber ? prev : { ...prev, invoiceNumber });
         }
       })
       .catch(() => {
