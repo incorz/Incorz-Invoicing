@@ -124,14 +124,25 @@ export default function InvoiceForm({
 
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1.5">
-            <Label className="text-xs">Number</Label>
-            <div className="h-9 flex items-center px-4 rounded-full border border-border bg-muted/60 text-xs font-semibold tabular-nums text-foreground">
-              {invoiceNumLoading ? (
-                <span className="text-muted-foreground animate-pulse">Loading…</span>
-              ) : (
-                `#${data.invoiceNumber}`
-              )}
-            </div>
+            <Label htmlFor="invoiceNumber" className="text-xs">Invoice Number</Label>
+            <Input
+              id="invoiceNumber"
+              type="number"
+              min="1"
+              placeholder={invoiceNumLoading ? "Loading…" : "Auto-generated number"}
+              value={data.invoiceNumber || ""}
+              onChange={(e) => updateField("invoiceNumber", Math.max(1, Number.parseInt(e.target.value, 10) || 0))}
+              className="field-input h-9"
+            />
+            <label className="flex items-center gap-2 text-[10px] text-muted-foreground">
+              <input
+                type="checkbox"
+                checked={data.isCustomInvoiceNumber ?? false}
+                onChange={(e) => updateField("isCustomInvoiceNumber", e.target.checked)}
+                className="accent-[#310971]"
+              />
+              Use custom invoice number
+            </label>
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="invoiceDate" className="text-xs">Date</Label>

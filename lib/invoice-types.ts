@@ -15,6 +15,7 @@ export interface InvoiceData {
   billToAddress2?: string;
   clientEmail?: string;
   invoiceNumber: number;
+  isCustomInvoiceNumber?: boolean;
   invoiceDate: string;
   serviceType: ServiceType;
   invoiceBy: string;
@@ -43,6 +44,7 @@ export const COMPANY_INFO = {
 
 export const DEFAULT_INVOICE: Omit<InvoiceData, "invoiceNumber"> = {
   billTo: "",
+  isCustomInvoiceNumber: false,
   billToAddress: "",
   billToAddress2: "",
   invoiceDate: new Date().toISOString().split("T")[0],
