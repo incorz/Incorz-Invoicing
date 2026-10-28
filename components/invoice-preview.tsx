@@ -22,7 +22,7 @@ const C = {
 
 const BRAND = "#8B1FA9";
 
-const FONT = "'manrope', Arial, sans-serif";
+const FONT = "'Unbounded', sans-serif";
 
 const PAGE_W  = 794;   // A4 @ 96 dpi
 const PAGE_H  = 1123;
@@ -464,7 +464,7 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
 
       </div>
 
-      {/* ── THANK YOU ─────────────────────────────────────────────────────── */}
+      {/* ── THANK YOU ──────────────────────────────────────────────────���──── */}
       <div style={{ padding: `32px ${PAD}px 28px`, textAlign: "center" }}>
         <span style={{ fontSize: "18px", fontWeight: "900", color: C.black }}>Thank you for your </span>
         <span style={{ fontSize: "18px", fontWeight: "900", color: BRAND }}>business!</span>
