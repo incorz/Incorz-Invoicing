@@ -78,8 +78,8 @@
 }
 
 @theme inline {
-  --font-sans: var(--font-manrope), 'Manrope', sans-serif;
-  --font-mono: 'Geist Mono', 'Geist Mono Fallback';
+  --font-sans: var(--font-unbounded), 'Unbounded', sans-serif;
+  --font-mono: var(--font-unbounded), 'Unbounded', sans-serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
